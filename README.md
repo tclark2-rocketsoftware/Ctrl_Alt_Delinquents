@@ -1,11 +1,12 @@
-# AI_Team
 
-A Python project for AI team collaboration and development.
+# Ctrl_Alt_Delinquents
+
+A Python project for Ctrl_Alt_Delinquents team collaboration and development.
 
 ## Project Structure
 
 ```
-AI_Team/
+Ctrl_Alt_Delinquents/
 ├── src/               # Source code directory
 │   └── main.py       # Main application entry point
 ├── tests/            # Test directory
@@ -43,7 +44,6 @@ python src/main.py
 
 ## Development
 
-This is a "Hello World" starter project. Extend it according to your needs.
 
 ## License
 

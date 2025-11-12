@@ -1,3 +1,3 @@
 """
-Tests package for AI_Team
+Tests package for Ctrl_Alt_Delinquents
 """
