@@ -1,0 +1,105 @@
+# Business logic for quizzes
+from sqlalchemy.orm import Session
+from app import models, schemas
+from typing import List, Optional
+
+
+def create_quiz(db: Session, quiz: schemas.QuizCreate):
+    """Create a new quiz with questions and answers"""
+    db_quiz = models.Quiz(
+        title=quiz.title,
+        description=quiz.description,
+        type=quiz.type,
+        created_by=quiz.created_by
+    )
+    db.add(db_quiz)
+    db.flush()
+    
+    for question_data in quiz.questions:
+        db_question = models.Question(
+            quiz_id=db_quiz.id,
+            text=question_data.text
+        )
+        db.add(db_question)
+        db.flush()
+        
+        for answer_data in question_data.answers:
+            db_answer = models.Answer(
+                question_id=db_question.id,
+                text=answer_data.text,
+                is_correct=answer_data.is_correct,
+                personality_tag=answer_data.personality_tag
+            )
+            db.add(db_answer)
+    
+    db.commit()
+    db.refresh(db_quiz)
+    return db_quiz
+
+
+def get_quizzes(
+    db: Session,
+    quiz_type: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100
+) -> List[models.Quiz]:
+    """Get all quizzes with optional filtering by type"""
+    query = db.query(models.Quiz)
+    
+    if quiz_type:
+        query = query.filter(models.Quiz.type == quiz_type)
+    
+    return query.offset(skip).limit(limit).all()
+
+
+def get_quiz(db: Session, quiz_id: int):
+    """Get a specific quiz by ID"""
+    return db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+
+
+def update_quiz(db: Session, quiz_id: int, quiz: schemas.QuizCreate):
+    """Update an existing quiz"""
+    db_quiz = get_quiz(db, quiz_id)
+    if not db_quiz:
+        return None
+    
+    # Update quiz fields
+    db_quiz.title = quiz.title
+    db_quiz.description = quiz.description
+    db_quiz.type = quiz.type
+    
+    # Delete existing questions and answers
+    db.query(models.Question).filter(models.Question.quiz_id == quiz_id).delete()
+    
+    # Add new questions and answers
+    for question_data in quiz.questions:
+        db_question = models.Question(
+            quiz_id=db_quiz.id,
+            text=question_data.text
+        )
+        db.add(db_question)
+        db.flush()
+        
+        for answer_data in question_data.answers:
+            db_answer = models.Answer(
+                question_id=db_question.id,
+                text=answer_data.text,
+                is_correct=answer_data.is_correct,
+                personality_tag=answer_data.personality_tag
+            )
+            db.add(db_answer)
+    
+    db.commit()
+    db.refresh(db_quiz)
+    return db_quiz
+
+
+def delete_quiz(db: Session, quiz_id: int) -> bool:
+    """Delete a quiz"""
+    db_quiz = get_quiz(db, quiz_id)
+    if not db_quiz:
+        return False
+    
+    db.delete(db_quiz)
+    db.commit()
+    return True
