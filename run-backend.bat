@@ -9,7 +9,7 @@ cd /d "%~dp0quizruption"
 REM Check if virtual environment exists
 if not exist "venv\" (
     echo Creating virtual environment...
-    python -m venv venv
+    py -m venv venv
     echo.
 )
 
