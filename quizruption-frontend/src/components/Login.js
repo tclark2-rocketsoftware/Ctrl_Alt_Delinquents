@@ -91,7 +91,10 @@ function Login({ onLogin }) {
           </form>
           
           <div className="auth-footer">
-            <p>Don't have an account? <Link to="/register" className="auth-link">Sign up here</Link></p>
+            <p className="auth-switch">
+              Don't have an account? 
+              <Link to="/register" className="auth-link"> Create one here</Link>
+            </p>
           </div>
         </div>
       </div>

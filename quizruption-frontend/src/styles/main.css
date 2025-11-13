@@ -132,8 +132,101 @@ body {
   animation: fadeInUp 0.8s ease-out;
 }
 
+.welcome-banner {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
 .home-header h1 {
   font-size: 3.5rem;
+  background: linear-gradient(135deg, #cc95af 0%, #ba99dc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.app-overview .main-description {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 300;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.feature-highlights {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.feature:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 1.5rem;
+}
+
+.feature-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Profile icon styling */
+.profile-icon {
+  font-size: 1.5rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.profile-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+/* Page headers for quiz and trivia pages */
+.page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.page-header h1 {
+  font-size: 3rem;
   background: linear-gradient(135deg, #cc95af 0%, #ba99dc 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -143,13 +236,20 @@ body {
   letter-spacing: -1px;
 }
 
-.home-header p {
-  font-size: 1.3rem;
+.page-header p {
+  font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 300;
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
+}
+
+.quiz-list-page,
+.trivia-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
 }
 
 .filter-section {
@@ -1757,6 +1857,12 @@ body {
 .auth-footer {
   text-align: center;
   margin-top: 1.5rem;
+}
+
+.auth-switch {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
 }
 
 .auth-link {

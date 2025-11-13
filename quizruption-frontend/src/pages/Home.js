@@ -9,8 +9,29 @@ function Home() {
   return (
     <div className="home">
       <div className="home-header">
-        <h1>Welcome to Quizruption</h1>
-        <p>Discover yourself through personality tests and challenge your mind with trivia! 🧠✨</p>
+        <div className="welcome-banner">
+          <h1>🎯 Welcome to Quizruption!</h1>
+          <div className="app-overview">
+            <p className="main-description">
+              Transform your mind through interactive quizzes and trivia! Discover your personality, 
+              challenge your knowledge, and have fun while learning about yourself and the world around you.
+            </p>
+            <div className="feature-highlights">
+              <div className="feature">
+                <span className="feature-icon">🌟</span>
+                <span className="feature-text">Personality Tests</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🧠</span>
+                <span className="feature-text">Mind-Bending Trivia</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🎲</span>
+                <span className="feature-text">Daily Challenges</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="filter-section">

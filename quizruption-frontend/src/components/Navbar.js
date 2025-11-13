@@ -20,33 +20,23 @@ function Navbar() {
           <li className="navbar-item">
             <Link to="/" className="navbar-link">🏠 Home</Link>
           </li>
-          {isAuthenticated ? (
-            <>
-              <li className="navbar-item">
-                <Link to="/dashboard" className="navbar-link">📊 Dashboard</Link>
-              </li>
-              <li className="navbar-item">
-                <Link to="/create" className="navbar-link">✨ Create Quiz</Link>
-              </li>
-              <li className="navbar-item">
-                <Link to="/profile" className="navbar-link">👤 Profile</Link>
-              </li>
-              <li className="navbar-item">
-                <span className="navbar-user">👋 {user?.display_name || user?.username}</span>
-              </li>
-              <li className="navbar-item">
-                <button onClick={handleLogout} className="navbar-logout">🚪 Logout</button>
-              </li>
-            </>
-          ) : (
-            <>
-              <li className="navbar-item">
-                <Link to="/login" className="navbar-link">🔐 Login</Link>
-              </li>
-              <li className="navbar-item">
-                <Link to="/register" className="navbar-link">✨ Sign Up</Link>
-              </li>
-            </>
+          <li className="navbar-item">
+            <Link to="/quiz" className="navbar-link">� Quiz</Link>
+          </li>
+          <li className="navbar-item">
+            <Link to="/trivia" className="navbar-link">🧠 Trivia</Link>
+          </li>
+          <li className="navbar-item">
+            {isAuthenticated ? (
+              <Link to="/profile" className="navbar-link profile-icon">👤</Link>
+            ) : (
+              <Link to="/login" className="navbar-link profile-icon">👤</Link>
+            )}
+          </li>
+          {isAuthenticated && (
+            <li className="navbar-item">
+              <button onClick={handleLogout} className="navbar-logout">🚪 Logout</button>
+            </li>
           )}
         </ul>
       </div>
