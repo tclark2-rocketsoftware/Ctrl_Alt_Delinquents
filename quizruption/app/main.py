@@ -1,8 +1,10 @@
 # FastAPI entry point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from app.database import engine, Base
-from app.routes import quizzes, answers, results
+from app.routes import quizzes, answers, results, auth
+import os
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -19,6 +21,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix="/api")
 app.include_router(quizzes.router, prefix="/api/quizzes", tags=["quizzes"])
 app.include_router(answers.router, prefix="/api/answers", tags=["answers"])
 app.include_router(results.router, prefix="/api/results", tags=["results"])
@@ -26,6 +29,16 @@ app.include_router(results.router, prefix="/api/results", tags=["results"])
 @app.get("/")
 async def root():
     return {"message": "Welcome to Quizruption API"}
+
+@app.get("/demo", response_class=HTMLResponse)
+async def demo():
+    """Serve the authentication demo page"""
+    demo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'demo.html')
+    try:
+        with open(demo_path, 'r', encoding='utf-8') as f:
+            return HTMLResponse(content=f.read(), status_code=200)
+    except FileNotFoundError:
+        return HTMLResponse(content="<h1>Demo page not found</h1>", status_code=404)
 
 @app.get("/health")
 async def health_check():
