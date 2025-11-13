@@ -124,3 +124,23 @@ class PersonalityContent(Base):
     quote = Column(Text)
     gif_url = Column(Text)
     joke = Column(Text)
+
+
+class DailyJoke(Base):
+    __tablename__ = "daily_jokes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(String, nullable=False, unique=True)  # YYYY-MM-DD
+    joke = Column(Text, nullable=False)
+    source = Column(String, nullable=False)  # 'openai' | 'fallback'
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class JokeSuggestion(Base):
+    __tablename__ = "joke_suggestions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    suggestion_text = Column(Text, nullable=False)
+    user_id = Column(Integer)
+    used = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())

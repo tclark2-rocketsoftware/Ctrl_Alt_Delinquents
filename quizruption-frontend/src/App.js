@@ -8,6 +8,7 @@ import Register from './components/Register';
 import Home from './pages/Home';
 import QuizPage from './pages/QuizPage';
 import ResultPage from './pages/ResultPage';
+import DailyJoke from './components/DailyJoke';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import CreateQuiz from './components/CreateQuiz';
@@ -89,6 +90,15 @@ function App() {
       <AuthProvider>
         <AppContent />
       </AuthProvider>
+      <div className="App">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/quiz/:id" element={<QuizPage />} />
+          <Route path="/result/:id" element={<ResultPage />} />
+          <Route path="/daily-joke" element={<DailyJoke />} />
+        </Routes>
+      </div>
     </Router>
   );
 }
