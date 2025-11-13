@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import QuizPage from './pages/QuizPage';
 import ResultPage from './pages/ResultPage';
+import DailyJoke from './components/DailyJoke';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/quiz/:id" element={<QuizPage />} />
           <Route path="/result/:id" element={<ResultPage />} />
+          <Route path="/daily-joke" element={<DailyJoke />} />
         </Routes>
       </div>
     </Router>

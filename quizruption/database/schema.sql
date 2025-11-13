@@ -48,6 +48,24 @@ CREATE TABLE IF NOT EXISTS personality_content (
     joke TEXT
 );
 
+-- Daily jokes table (one joke per calendar day)
+CREATE TABLE IF NOT EXISTS daily_jokes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    joke TEXT NOT NULL,
+    source TEXT NOT NULL, -- 'openai' or 'fallback'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Joke suggestions table
+CREATE TABLE IF NOT EXISTS joke_suggestions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    suggestion_text TEXT NOT NULL,
+    user_id INTEGER,
+    used BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Sample data for personality content
 INSERT OR IGNORE INTO personality_content (personality, quote, gif_url, joke) VALUES
 ('adventurer', 'Life is either a daring adventure or nothing at all.', 'https://media.giphy.com/media/adventure/giphy.gif', 'Why don''t mountains get cold? They wear snow caps!'),

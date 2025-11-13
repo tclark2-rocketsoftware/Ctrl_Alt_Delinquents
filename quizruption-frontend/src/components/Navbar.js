@@ -16,6 +16,9 @@ function Navbar() {
           <li className="navbar-item">
             <Link to="/create" className="navbar-link">Create Quiz</Link>
           </li>
+          <li className="navbar-item">
+            <Link to="/daily-joke" className="navbar-link">Daily Joke</Link>
+          </li>
         </ul>
       </div>
     </nav>

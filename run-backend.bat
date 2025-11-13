@@ -30,6 +30,6 @@ echo ===============================================
 echo.
 
 REM Start the FastAPI server
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --env-file .env
 
 pause
