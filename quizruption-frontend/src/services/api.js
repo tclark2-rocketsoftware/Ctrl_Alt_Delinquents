@@ -10,6 +10,33 @@ const api = axios.create({
   },
 });
 
+// Add request interceptor to include auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.params = { ...config.params, token };
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear token on unauthorized access
+      localStorage.removeItem('authToken');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Quiz endpoints
 export const getQuizzes = async (type = null) => {
   const params = type ? { quiz_type: type } : {};
@@ -52,25 +79,32 @@ export const getResult = async (id) => {
 // Authentication endpoints
 export const login = async (credentials) => {
   const response = await api.post('/auth/login', credentials);
+  if (response.data.access_token) {
+    localStorage.setItem('authToken', response.data.access_token);
+  }
   return response.data;
 };
 
 export const register = async (userData) => {
   const response = await api.post('/auth/register', userData);
+  if (response.data.access_token) {
+    localStorage.setItem('authToken', response.data.access_token);
+  }
   return response.data;
 };
 
-export const getCurrentUser = async (token) => {
-  const response = await api.get('/auth/me', { params: { token } });
+export const getCurrentUser = async () => {
+  const response = await api.get('/auth/me');
   return response.data;
+};
+
+export const logout = () => {
+  localStorage.removeItem('authToken');
 };
 
 // Profile endpoints
 export const updateUserProfile = async (profileData) => {
-  const token = localStorage.getItem('authToken');
-  const response = await api.put('/auth/profile', profileData, {
-    params: { token }
-  });
+  const response = await api.put('/auth/profile', profileData);
   return response.data;
 };
 

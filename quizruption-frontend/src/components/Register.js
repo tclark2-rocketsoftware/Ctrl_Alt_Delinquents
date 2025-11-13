@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { register } from '../services/api';
 
 function Register({ onRegister }) {
   const [formData, setFormData] = useState({
@@ -38,28 +39,14 @@ function Register({ onRegister }) {
     }
 
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        }),
+      const userData = await register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
       });
-
-      if (response.ok) {
-        const userData = await response.json();
-        onRegister(userData);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Registration failed');
-      }
+      onRegister(userData.user); // Pass the user data from the response
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

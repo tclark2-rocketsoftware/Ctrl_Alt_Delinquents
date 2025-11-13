@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { getCurrentUser, logout as apiLogout } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -43,19 +44,25 @@ export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const user = JSON.parse(storedUser);
-        dispatch({ type: 'LOGIN', payload: user });
-      } catch (error) {
-        localStorage.removeItem('user');
+    // Check if user is already logged in (check for auth token)
+    const checkAuthToken = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        try {
+          const user = await getCurrentUser();
+          dispatch({ type: 'LOGIN', payload: user });
+        } catch (error) {
+          // Token is invalid, clear it
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
+      } else {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
-    } else {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
+    };
+
+    checkAuthToken();
   }, []);
 
   const login = (userData) => {
@@ -65,6 +72,8 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    apiLogout(); // Call API logout if needed
     dispatch({ type: 'LOGOUT' });
   };
 

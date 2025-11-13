@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { login } from '../services/api';
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -22,24 +23,10 @@ function Login({ onLogin }) {
     setError('');
 
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        onLogin(userData);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Login failed');
-      }
+      const userData = await login(formData);
+      onLogin(userData.user); // Pass the user data from the response
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.response?.data?.detail || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
