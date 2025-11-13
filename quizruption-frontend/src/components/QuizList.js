@@ -1,20 +1,29 @@
 // Display all quizzes
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getQuizzes } from '../services/api';
+import { getQuizzes, deleteQuiz } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
-function QuizList({ filter, limit, showTitle = true }) {
+function QuizList({ filter, limit, showTitle = true, type, title }) {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
         setLoading(true);
         const data = await getQuizzes(filter);
+        
+        // Filter by type if specified
+        let filteredData = data;
+        if (type) {
+          filteredData = data.filter(quiz => quiz.type === type);
+        }
+        
         // Limit the number of quizzes shown if limit is provided
-        const limitedData = limit ? data.slice(0, limit) : data;
+        const limitedData = limit ? filteredData.slice(0, limit) : filteredData;
         setQuizzes(limitedData);
         setError(null);
       } catch (err) {
@@ -26,22 +35,48 @@ function QuizList({ filter, limit, showTitle = true }) {
     };
 
     fetchQuizzes();
-  }, [filter, limit]);
+  }, [filter, limit, type]);
+
+  const handleDelete = async (quizId, quizTitle) => {
+    if (window.confirm(`Are you sure you want to delete "${quizTitle}"? This action cannot be undone.`)) {
+      try {
+        await deleteQuiz(quizId);
+        // Refresh the quiz list
+        setQuizzes(quizzes.filter(quiz => quiz.id !== quizId));
+      } catch (error) {
+        alert('Error deleting quiz: ' + error.message);
+      }
+    }
+  };
 
   if (loading) return <div className="loading">Loading quizzes...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="quiz-list">
-      {showTitle && <h2 className="section-title">🌟 Recently Created Quizzes</h2>}
+      {showTitle && (
+        <h2 className="section-title">
+          {title || (type === 'trivia' ? '🧠 Recently Created Trivia' : type === 'personality' ? '🌟 Recently Created Quizzes' : '🎯 Recently Created Content')}
+        </h2>
+      )}
       {quizzes.length === 0 ? (
         <div className="empty-state">
           <div className="empty-content">
-            <div className="empty-icon">🎯</div>
-            <h3>No Quizzes Yet!</h3>
-            <p>Be the first to create a quiz and share it with the community.</p>
+            <div className="empty-icon">{type === 'trivia' ? '🧠' : '🎯'}</div>
+            <h3>
+              {type === 'trivia' ? 'No Trivia Yet!' : type === 'personality' ? 'No Quizzes Yet!' : 'No Quizzes Yet!'}
+            </h3>
+            <p>
+              {type === 'trivia' 
+                ? 'Be the first to create a trivia quiz and test knowledge!' 
+                : type === 'personality'
+                ? 'Be the first to create a personality quiz and share it with the community.'
+                : 'Be the first to create a quiz and share it with the community.'}
+            </p>
             <div className="empty-actions">
-              <Link to="/create" className="btn-primary">✨ Create Your First Quiz</Link>
+              <Link to="/create" className="btn-primary">
+                ✨ {type === 'trivia' ? 'Create Your First Trivia' : 'Create Your First Quiz'}
+              </Link>
             </div>
           </div>
         </div>
@@ -77,11 +112,24 @@ function QuizList({ filter, limit, showTitle = true }) {
               
               <div className="quiz-actions">
                 <Link to={`/quiz/${quiz.id}`} className="btn-primary">
-                  🚀 Start Quiz
+                  🚀 Start {quiz.type === 'trivia' ? 'Trivia' : 'Quiz'}
                 </Link>
                 <Link to={`/quiz/${quiz.id}/details`} className="btn-secondary">
                   📖 Details
                 </Link>
+                {user && quiz.created_by === user.id && (
+                  <div className="creator-actions">
+                    <Link to={`/edit/${quiz.id}`} className="btn-edit">
+                      ✏️ Edit
+                    </Link>
+                    <button 
+                      onClick={() => handleDelete(quiz.id, quiz.title)}
+                      className="btn-delete"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

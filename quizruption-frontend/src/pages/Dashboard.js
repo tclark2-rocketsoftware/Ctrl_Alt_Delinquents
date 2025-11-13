@@ -82,7 +82,7 @@ function Dashboard() {
                 🏠 Back to Home
               </button>
               <button className="btn-secondary" onClick={() => window.location.href = '/create'}>
-                ✨ Create Quiz
+                ✨ Create Content
               </button>
               <button className="btn-danger" onClick={handleLogout}>
                 🚪 Logout

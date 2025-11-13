@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateUserProfile, getUserStats } from '../services/api';
+import { Link } from 'react-router-dom';
 
 function Profile() {
   const { user, updateUser } = useAuth();
@@ -38,6 +39,14 @@ function Profile() {
       setStats(userStats);
     } catch (error) {
       console.error('Error loading user stats:', error);
+      setStats({
+        stats: {
+          quizzes_created: 0,
+          quizzes_taken: 0,
+          personality_traits_discovered: 0,
+          joke_suggestions_submitted: 0
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -78,6 +87,10 @@ function Profile() {
   const getInitials = (name) => {
     return name ? name.split(' ').map(n => n[0]).join('').toUpperCase() : user?.username?.[0]?.toUpperCase() || 'U';
   };
+
+  if (!user) {
+    return <div className="loading">Please log in to view your profile.</div>;
+  }
 
   if (loading) {
     return <div className="loading">Loading profile...</div>;
@@ -186,171 +199,46 @@ function Profile() {
           </div>
         </div>
 
-        {/* Stats Section */}
+        {/* Stats Section with Navigation Links */}
         {stats && (
           <div className="profile-stats">
             <h2>📊 Your Quiz Journey</h2>
             <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-number">{stats.stats.quizzes_created}</div>
+              <Link to="/profile/created" className="stat-card">
+                <div className="stat-number">{stats.stats?.quizzes_created || 0}</div>
                 <div className="stat-label">Quizzes Created</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">{stats.stats.quizzes_taken}</div>
+                <div className="stat-link-text">View All →</div>
+              </Link>
+              <Link to="/profile/taken" className="stat-card">
+                <div className="stat-number">{stats.stats?.quizzes_taken || 0}</div>
                 <div className="stat-label">Quizzes Taken</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">{stats.stats.personality_traits_discovered}</div>
-                <div className="stat-label">Traits Discovered</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">{stats.stats.joke_suggestions_submitted || 0}</div>
+                <div className="stat-link-text">View Results →</div>
+              </Link>
+              <Link to="/profile/jokes" className="stat-card">
+                <div className="stat-number">{stats.stats?.joke_suggestions_submitted || 0}</div>
                 <div className="stat-label">Joke Suggestions</div>
-              </div>
+                <div className="stat-link-text">Manage →</div>
+              </Link>
             </div>
           </div>
         )}
 
-        {/* Personality Results */}
-        {stats && stats.personality_results && stats.personality_results.length > 0 && (
-          <div className="results-section">
-            <h2>🌟 Personality Quiz Results</h2>
-            <div className="results-grid">
-              {stats.personality_results.map((result) => (
-                <div key={result.id} className="result-card personality-result">
-                  <div className="result-icon">🎭</div>
-                  <h3>{result.personality}</h3>
-                  <p className="result-date">
-                    {new Date(result.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
+        {/* Quick Actions */}
+        <div className="profile-quick-actions">
+          <h2>� Quick Actions</h2>
+          <div className="actions-grid">
+            <Link to="/create" className="action-card">
+              <div className="action-icon">✏️</div>
+              <h3>Create New Quiz</h3>
+              <p>Build a personality or trivia quiz</p>
+            </Link>
+            <Link to="/dashboard" className="action-card">
+              <div className="action-icon">🎯</div>
+              <h3>Browse Quizzes</h3>
+              <p>Discover new quizzes to take</p>
+            </Link>
           </div>
-        )}
-
-        {/* Trivia Results */}
-        {stats && stats.trivia_results && stats.trivia_results.length > 0 && (
-          <div className="results-section">
-            <h2>🧠 Trivia Quiz Results</h2>
-            <div className="results-grid">
-              {stats.trivia_results.map((result) => (
-                <div key={result.id} className="result-card trivia-result">
-                  <div className="result-icon">🎯</div>
-                  <h3>Score: {result.score}</h3>
-                  <p className="result-date">
-                    {new Date(result.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Joke Suggestions */}
-        {stats && stats.joke_suggestions && stats.joke_suggestions.length > 0 && (
-          <div className="suggestions-section">
-            <h2>😂 Your Joke Suggestions</h2>
-            <div className="suggestions-list">
-              {stats.joke_suggestions.map((suggestion) => (
-                <div key={suggestion.id} className="suggestion-card">
-                  <div className="suggestion-content">
-                    <p className="suggestion-text">"{suggestion.suggestion_text}"</p>
-                    <div className="suggestion-meta">
-                      <span className="suggestion-date">
-                        {new Date(suggestion.created_at).toLocaleDateString()}
-                      </span>
-                      {suggestion.used && (
-                        <span className="suggestion-badge used">✓ Used</span>
-                      )}
-                      {!suggestion.used && (
-                        <span className="suggestion-badge pending">⏳ Pending</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Personality Traits */}
-        {stats && stats.personality_traits.length > 0 && (
-          <div className="personality-section">
-            <h2>🧠 Your Personality Traits</h2>
-            <div className="traits-grid">
-              {stats.personality_traits.map((trait, index) => (
-                <div key={index} className="trait-card">
-                  <div className="trait-icon">🎯</div>
-                  <div className="trait-name">{trait}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Created Quizzes */}
-        {stats && stats.quizzes_created.length > 0 && (
-          <div className="created-quizzes-section">
-            <h2>📝 Quizzes You've Created</h2>
-            <div className="quiz-grid">
-              {stats.quizzes_created.map((quiz) => (
-                <div key={quiz.id} className="quiz-card">
-                  <h3>{quiz.title}</h3>
-                  <p>{quiz.description}</p>
-                  <div className="quiz-meta">
-                    <span className="quiz-type">{quiz.type}</span>
-                    <span className="quiz-date">
-                      {new Date(quiz.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Recent Activity */}
-        {stats && stats.recent_activity && (
-          <div className="activity-section">
-            <h2>📈 Recent Activity</h2>
-            <div className="activity-grid">
-              {stats.recent_activity.recent_quizzes.length > 0 && (
-                <div className="activity-card">
-                  <h3>Recently Created</h3>
-                  <div className="activity-list">
-                    {stats.recent_activity.recent_quizzes.map((quiz) => (
-                      <div key={quiz.id} className="activity-item">
-                        <span className="activity-title">{quiz.title}</span>
-                        <span className="activity-date">
-                          {new Date(quiz.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {stats.recent_activity.recent_results.length > 0 && (
-                <div className="activity-card">
-                  <h3>Recently Taken</h3>
-                  <div className="activity-list">
-                    {stats.recent_activity.recent_results.map((result) => (
-                      <div key={result.id} className="activity-item">
-                        <span className="activity-title">
-                          {result.personality || `Quiz ${result.quiz_id}`}
-                        </span>
-                        <span className="activity-date">
-                          {new Date(result.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

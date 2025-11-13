@@ -14,7 +14,11 @@ import ResultPage from './pages/ResultPage';
 import DailyJoke from './components/DailyJoke';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import CreatedQuizzes from './pages/CreatedQuizzes';
+import TakenQuizzes from './pages/TakenQuizzes';
+import JokeSuggestions from './pages/JokeSuggestions';
 import CreateQuiz from './components/CreateQuiz';
+import EditQuiz from './components/EditQuiz';
 import TurtleChatBot from './components/TurtleChatBot';
 import './styles/main.css';
 
@@ -77,21 +81,33 @@ function AppContent() {
             <CreateQuiz />
           </ProtectedRoute>
         } />
+        <Route path="/edit/:id" element={
+          <ProtectedRoute>
+            <EditQuiz />
+          </ProtectedRoute>
+        } />
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
         } />
-        <Route path="/quiz/:id" element={
+        <Route path="/profile/created" element={
           <ProtectedRoute>
-            <QuizPage />
+            <CreatedQuizzes />
           </ProtectedRoute>
         } />
-        <Route path="/result/:id" element={
+        <Route path="/profile/taken" element={
           <ProtectedRoute>
-            <ResultPage />
+            <TakenQuizzes />
           </ProtectedRoute>
         } />
+        <Route path="/profile/jokes" element={
+          <ProtectedRoute>
+            <JokeSuggestions />
+          </ProtectedRoute>
+        } />
+        <Route path="/quiz/:id" element={<QuizPage />} />
+        <Route path="/result/:id" element={<ResultPage />} />
         <Route path="/daily-joke" element={<DailyJoke onOpenChat={handleOpenChat} />} />
       </Routes>
       <TurtleChatBot ref={chatBotRef} />

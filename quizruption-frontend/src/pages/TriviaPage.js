@@ -100,7 +100,12 @@ function TriviaPage() {
         </div>
       </div>
 
-      <QuizList filter={selectedTags.length === 0 ? null : selectedTags} showTitle={false} />
+      <QuizList 
+        filter={selectedTags.length === 0 ? null : selectedTags} 
+        showTitle={false} 
+        type="trivia"
+        title="🧠 Trivia Quizzes"
+      />
     </div>
   );
 }
