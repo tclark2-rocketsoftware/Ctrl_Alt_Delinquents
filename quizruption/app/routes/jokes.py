@@ -4,6 +4,7 @@ from app.database import get_db
 from app.services.joke_service import get_daily_joke
 from app.models import JokeSuggestion
 from pydantic import BaseModel
+from typing import Optional
 import os
 
 router = APIRouter()
@@ -11,6 +12,7 @@ router = APIRouter()
 
 class SuggestionRequest(BaseModel):
     suggestion_text: str
+    user_id: Optional[int] = None
 
 
 @router.get('/daily', summary='Get today\'s joke', description='Returns a single AI (or fallback) generated joke cached for the day.')
@@ -22,7 +24,7 @@ def daily_joke(db: Session = Depends(get_db)):
 def create_suggestion(suggestion: SuggestionRequest, db: Session = Depends(get_db)):
     new_suggestion = JokeSuggestion(
         suggestion_text=suggestion.suggestion_text,
-        user_id=None,  # Can add user tracking later
+        user_id=suggestion.user_id,
         used=False
     )
     db.add(new_suggestion)

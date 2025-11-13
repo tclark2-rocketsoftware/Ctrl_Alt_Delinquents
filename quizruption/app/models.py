@@ -26,6 +26,7 @@ class User(Base):
     # Relationships
     quizzes = relationship("Quiz", back_populates="creator")
     results = relationship("Result", back_populates="user")
+    joke_suggestions = relationship("JokeSuggestion", back_populates="user")
     
     def set_password(self, password):
         """Hash and set password"""
@@ -141,6 +142,8 @@ class JokeSuggestion(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     suggestion_text = Column(Text, nullable=False)
-    user_id = Column(Integer)
+    user_id = Column(Integer, ForeignKey("users.id"))
     used = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
+    
+    user = relationship("User", back_populates="joke_suggestions")

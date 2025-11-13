@@ -37,11 +37,15 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router, prefix="/api")
+app.include_router(auth.router)  # auth router now carries its own /api/auth prefix
 app.include_router(quizzes.router, prefix="/api/quizzes", tags=["quizzes"])
 app.include_router(answers.router, prefix="/api/answers", tags=["answers"])
 app.include_router(results.router, prefix="/api/results", tags=["results"])
 app.include_router(jokes.router, prefix="/api/jokes", tags=["jokes"])
+
+# Immediate route enumeration for debugging (before startup event)
+for route in app.routes:
+    logging.getLogger().info(f"(early) Route registered: {getattr(route, 'path', 'unknown')} -> {getattr(route, 'name', '')}")
 
 @app.on_event("startup")
 async def _setup_logging_after_startup():
@@ -52,6 +56,12 @@ async def _setup_logging_after_startup():
         root_logger.addHandler(file_handler)
     root_logger.setLevel(logging.INFO)
     root_logger.info("Logging configured after startup.")
+    # Log registered routes for debugging router inclusion issues
+    try:
+        for route in app.routes:
+            root_logger.info(f"Route registered: {getattr(route, 'path', 'unknown')} -> {getattr(route, 'name', '')}")
+    except Exception as e:
+        root_logger.warning(f"Failed to list routes: {e}")
 
 @app.get("/")
 async def root():

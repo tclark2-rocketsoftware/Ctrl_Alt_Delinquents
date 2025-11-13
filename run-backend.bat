@@ -39,12 +39,10 @@ echo.
 
 REM Start the FastAPI server
 if exist "venv\Scripts\uvicorn.exe" (
+    rem Start uvicorn and keep terminal attached; remove pause for non-interactive use
     venv\Scripts\uvicorn.exe app.main:app --reload
 ) else (
     echo ERROR: uvicorn not found! Dependencies may not have installed correctly.
     echo Please check the error messages above.
-    pause
     exit /b 1
 )
-
-pause

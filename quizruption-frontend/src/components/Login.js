@@ -22,8 +22,7 @@ function Login({ onLogin }) {
     setError('');
 
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,13 +31,17 @@ function Login({ onLogin }) {
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        onLogin(userData);
+        const data = await response.json();
+        // Store the access token
+        localStorage.setItem('authToken', data.access_token);
+        // Pass the user object to onLogin (which calls login)
+        onLogin(data.user);
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Login failed');
+        setError(errorData.detail || errorData.message || 'Login failed');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
