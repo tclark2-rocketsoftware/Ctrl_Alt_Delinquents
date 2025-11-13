@@ -49,6 +49,41 @@ export const getResult = async (id) => {
   return response.data;
 };
 
+// Authentication endpoints
+export const login = async (credentials) => {
+  const response = await api.post('/auth/login', credentials);
+  return response.data;
+};
+
+export const register = async (userData) => {
+  const response = await api.post('/auth/register', userData);
+  return response.data;
+};
+
+export const getCurrentUser = async (token) => {
+  const response = await api.get('/auth/me', { params: { token } });
+  return response.data;
+};
+
+// Profile endpoints
+export const updateUserProfile = async (profileData) => {
+  const token = localStorage.getItem('authToken');
+  const response = await api.put('/auth/profile', profileData, {
+    params: { token }
+  });
+  return response.data;
+};
+
+export const getUserProfile = async (userId) => {
+  const response = await api.get(`/auth/profile/${userId}`);
+  return response.data;
+};
+
+export const getUserStats = async (userId) => {
+  const response = await api.get(`/auth/profile/${userId}/stats`);
+  return response.data;
+};
+
 export const getQuizResults = async (quizId) => {
   const response = await api.get(`/results/quiz/${quizId}`);
   return response.data;

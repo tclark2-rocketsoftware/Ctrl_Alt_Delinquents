@@ -1,5 +1,5 @@
 # Business logic for quizzes
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app import models, schemas
 from typing import List, Optional
 
@@ -44,7 +44,7 @@ def get_quizzes(
     limit: int = 100
 ) -> List[models.Quiz]:
     """Get all quizzes with optional filtering by type"""
-    query = db.query(models.Quiz)
+    query = db.query(models.Quiz).options(joinedload(models.Quiz.creator))
     
     if quiz_type:
         query = query.filter(models.Quiz.type == quiz_type)
@@ -53,8 +53,11 @@ def get_quizzes(
 
 
 def get_quiz(db: Session, quiz_id: int):
-    """Get a specific quiz by ID"""
-    return db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    """Get a specific quiz by ID with creator information"""
+    return db.query(models.Quiz)\
+        .options(joinedload(models.Quiz.creator))\
+        .filter(models.Quiz.id == quiz_id)\
+        .first()
 
 
 def update_quiz(db: Session, quiz_id: int, quiz: schemas.QuizCreate):

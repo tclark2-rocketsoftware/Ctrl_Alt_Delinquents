@@ -1,4 +1,14 @@
--- SQLite Database Schema for Quizruption
+-- SQLite Database Schema for Quizruption with User Authentication
+
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Quizzes table
 CREATE TABLE IF NOT EXISTS quizzes (
@@ -7,7 +17,8 @@ CREATE TABLE IF NOT EXISTS quizzes (
     description TEXT,
     type TEXT CHECK(type IN ('trivia', 'personality')) NOT NULL,
     created_by INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Questions table
@@ -36,7 +47,8 @@ CREATE TABLE IF NOT EXISTS results (
     score INTEGER,
     personality TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Personality content table
@@ -47,6 +59,33 @@ CREATE TABLE IF NOT EXISTS personality_content (
     gif_url TEXT,
     joke TEXT
 );
+
+-- Daily jokes table (one joke per calendar day)
+CREATE TABLE IF NOT EXISTS daily_jokes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    joke TEXT NOT NULL,
+    source TEXT NOT NULL, -- 'openai' or 'fallback'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Joke suggestions table
+CREATE TABLE IF NOT EXISTS joke_suggestions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    suggestion_text TEXT NOT NULL,
+    user_id INTEGER,
+    used BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_quizzes_user_id ON quizzes(created_by);
+CREATE INDEX IF NOT EXISTS idx_results_user_id ON results(user_id);
+CREATE INDEX IF NOT EXISTS idx_results_quiz_id ON results(quiz_id);
+CREATE INDEX IF NOT EXISTS idx_questions_quiz_id ON questions(quiz_id);
+CREATE INDEX IF NOT EXISTS idx_answers_question_id ON answers(question_id);
 
 -- Sample data for personality content
 INSERT OR IGNORE INTO personality_content (personality, quote, gif_url, joke) VALUES

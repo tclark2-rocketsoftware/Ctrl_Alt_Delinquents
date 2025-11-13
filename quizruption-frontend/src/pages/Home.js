@@ -1,6 +1,7 @@
 // Home page
 import React, { useState } from 'react';
 import QuizList from '../components/QuizList';
+import DailyJoke from '../components/DailyJoke';
 
 function Home() {
   const [filter, setFilter] = useState(null);
@@ -9,7 +10,7 @@ function Home() {
     <div className="home">
       <div className="home-header">
         <h1>Welcome to Quizruption</h1>
-        <p>Test your knowledge or discover your personality!</p>
+        <p>Discover yourself through personality tests and challenge your mind with trivia! 🧠✨</p>
       </div>
 
       <div className="filter-section">
@@ -17,23 +18,28 @@ function Home() {
           className={`filter-btn ${filter === null ? 'active' : ''}`}
           onClick={() => setFilter(null)}
         >
-          All Quizzes
+          🎲 All Quizzes
         </button>
         <button 
           className={`filter-btn ${filter === 'trivia' ? 'active' : ''}`}
           onClick={() => setFilter('trivia')}
         >
-          Trivia
+          🧠 Trivia
         </button>
         <button 
           className={`filter-btn ${filter === 'personality' ? 'active' : ''}`}
           onClick={() => setFilter('personality')}
         >
-          Personality
+          🌟 Personality
         </button>
       </div>
 
       <QuizList filter={filter} />
+      
+      {/* Daily Joke Section */}
+      <div className="home-joke-section">
+        <DailyJoke />
+      </div>
     </div>
   );
 }
