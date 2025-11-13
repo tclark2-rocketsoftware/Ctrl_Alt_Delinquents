@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+// Use centralized API service instead of hardcoded localhost URL
+import { login as loginRequest } from '../services/api';
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -22,27 +24,21 @@ function Login({ onLogin }) {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Store the access token
-        localStorage.setItem('authToken', data.access_token);
-        // Pass the user object to onLogin (which calls login)
-        onLogin(data.user);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || errorData.message || 'Login failed');
-      }
+      const data = await loginRequest(formData);
+      localStorage.setItem('authToken', data.access_token);
+      onLogin(data.user);
     } catch (err) {
+      // Axios error handling
+      if (err.response) {
+        const errorData = err.response.data || {};
+        setError(errorData.detail || errorData.message || 'Login failed');
+      } else if (err.request) {
+        // Likely a network / host resolution issue
+        setError('Network error. Please check your connection or API URL.');
+      } else {
+        setError('Unexpected error. Please try again.');
+      }
       console.error('Login error:', err);
-      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }

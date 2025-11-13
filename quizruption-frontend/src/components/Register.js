@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { register as registerRequest } from '../services/api';
 
 function Register({ onRegister }) {
   const [formData, setFormData] = useState({
@@ -38,31 +39,23 @@ function Register({ onRegister }) {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password
-        }),
+      const data = await registerRequest({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Store the access token
-        localStorage.setItem('authToken', data.access_token);
-        // Pass the user object to onRegister (which calls login)
-        onRegister(data.user);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || errorData.message || 'Registration failed');
-      }
+      localStorage.setItem('authToken', data.access_token);
+      onRegister(data.user);
     } catch (err) {
+      if (err.response) {
+        const errorData = err.response.data || {};
+        setError(errorData.detail || errorData.message || 'Registration failed');
+      } else if (err.request) {
+        setError('Network error. Please check your connection or API URL.');
+      } else {
+        setError('Unexpected error. Please try again.');
+      }
       console.error('Registration error:', err);
-      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
