@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from app.database import engine, Base
-from app.routes import quizzes, answers, results
+from app.routes import quizzes, answers, results, auth
 from app.routes import jokes
 import logging
 from logging.handlers import RotatingFileHandler

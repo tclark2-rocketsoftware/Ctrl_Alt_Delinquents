@@ -79,6 +79,7 @@ function AppContent() {
             <ResultPage />
           </ProtectedRoute>
         } />
+        <Route path="/daily-joke" element={<DailyJoke />} />
       </Routes>
     </div>
   );
@@ -90,15 +91,6 @@ function App() {
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-      <div className="App">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/quiz/:id" element={<QuizPage />} />
-          <Route path="/result/:id" element={<ResultPage />} />
-          <Route path="/daily-joke" element={<DailyJoke />} />
-        </Routes>
-      </div>
     </Router>
   );
 }
