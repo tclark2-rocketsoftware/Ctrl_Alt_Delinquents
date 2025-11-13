@@ -1,7 +1,7 @@
 quiz_data = [
     {
         "title": "Which Marvel Hero Are You?",
-        "author": "QuizMaster3000",
+        "created_by": 1,
         "description": "Discover which Marvel superhero matches your personality!",
         "type": "personality",
         "questions": [
@@ -36,7 +36,7 @@ quiz_data = [
     },
     {
         "title": "Which Friends Character Are You?",
-        "author": "CentralPerkFan",
+        "created_by": 2,
         "description": "Find out which character from Friends best matches your vibe.",
         "type": "personality",
         "questions": [
@@ -77,7 +77,7 @@ quiz_data = [
     },
     {
         "title": "Which Taylor Swift Era Are You?",
-        "author": "SwiftieForever",
+        "created_by": 3,
         "description": "Which Taylor Swift album era matches your personality?",
         "type": "personality",
         "questions": [
@@ -115,7 +115,7 @@ quiz_data = [
     },
     {
         "title": "Marvel Cinematic Universe Trivia",
-        "author": "QuizruptionBot",
+        "created_by": 4,
         "description": "Test your knowledge of the Marvel Cinematic Universe.",
         "type": "trivia",
         "questions": [
@@ -168,7 +168,7 @@ quiz_data = [
     },
     {
         "title": "Classic TV Shows Trivia",
-        "author": "QuizruptionBot",
+        "created_by": 4,
         "description": "How well do you know classic television?",
         "type": "trivia",
         "questions": [
@@ -221,7 +221,7 @@ quiz_data = [
     },
     {
         "title": "Music Legends Trivia",
-        "author": "QuizruptionBot",
+        "created_by": 4,
         "description": "Trivia about famous music legends.",
         "type": "trivia",
         "questions": [
