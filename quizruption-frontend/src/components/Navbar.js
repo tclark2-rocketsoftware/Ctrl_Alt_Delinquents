@@ -20,6 +20,9 @@ function Navbar() {
           <li className="navbar-item">
             <Link to="/" className="navbar-link">🏠 Home</Link>
           </li>
+          <li className="navbar-item">
+            <Link to="/daily-joke" className="navbar-link">😂 Daily Joke</Link>
+          </li>
           {isAuthenticated ? (
             <>
               <li className="navbar-item">
