@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Login from './components/Login';
 import Register from './components/Register';
 import Home from './pages/Home';
@@ -85,6 +86,7 @@ function AppContent() {
         } />
         <Route path="/daily-joke" element={<DailyJoke />} />
       </Routes>
+      <Footer />
     </div>
   );
 }
