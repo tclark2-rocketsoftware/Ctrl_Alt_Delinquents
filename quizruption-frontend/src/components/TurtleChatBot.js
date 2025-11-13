@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { sendChatMessage } from '../services/api';
 
-const TurtleChatBot = () => {
+const TurtleChatBot = forwardRef((props, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -88,6 +88,13 @@ const TurtleChatBot = () => {
       handleSendMessage(e);
     }
   };
+
+  // Expose method to parent component to open chat
+  useImperativeHandle(ref, () => ({
+    openChat: () => {
+      setIsOpen(true);
+    }
+  }));
 
   return (
     <>
@@ -179,6 +186,6 @@ const TurtleChatBot = () => {
       )}
     </>
   );
-};
+});
 
 export default TurtleChatBot;

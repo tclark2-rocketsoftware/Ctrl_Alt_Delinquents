@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getDailyJoke, nextAvailableDate } from '../services/jokeService';
 
-function DailyJoke() {
+function DailyJoke({ onOpenChat }) {
   const [joke, setJoke] = useState('');
   const [source, setSource] = useState('');
   const [loading, setLoading] = useState(true);
@@ -117,10 +117,16 @@ function DailyJoke() {
         </div>
       )}
       
-      <div className="bouncing-turtle">
-        🐢
-        <div className="turtle-speech-bubble">HELLO</div>
-      </div>
+      {onOpenChat && (
+        <div 
+          className="bouncing-turtle clickable-turtle" 
+          onClick={onOpenChat}
+          title="🐢 Click me to chat with Terry the Turtle!"
+        >
+          🐢
+          <div className="turtle-speech-bubble">Chat with me!</div>
+        </div>
+      )}
       
       <div className="daily-joke-card">
         <h1>Daily Joke</h1>

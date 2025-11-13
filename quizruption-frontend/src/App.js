@@ -1,5 +1,5 @@
 // Main app component
-import React from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
@@ -41,6 +41,13 @@ function PublicRoute({ children }) {
 
 function AppContent() {
   const { login, logout } = useAuth();
+  const chatBotRef = useRef(null);
+
+  const handleOpenChat = () => {
+    if (chatBotRef.current) {
+      chatBotRef.current.openChat();
+    }
+  };
 
   return (
     <div className="App">
@@ -56,7 +63,7 @@ function AppContent() {
             <Register onRegister={login} />
           </PublicRoute>
         } />
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home onOpenChat={handleOpenChat} />} />
         <Route path="/quiz" element={<QuizListPage />} />
         <Route path="/trivia" element={<TriviaPage />} />
         <Route path="/dashboard" element={
@@ -84,9 +91,9 @@ function AppContent() {
             <ResultPage />
           </ProtectedRoute>
         } />
-        <Route path="/daily-joke" element={<DailyJoke />} />
+        <Route path="/daily-joke" element={<DailyJoke onOpenChat={handleOpenChat} />} />
       </Routes>
-      <TurtleChatBot />
+      <TurtleChatBot ref={chatBotRef} />
     </div>
   );
 }

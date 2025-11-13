@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import QuizList from '../components/QuizList';
 import DailyJoke from '../components/DailyJoke';
 
-function Home() {
+function Home({ onOpenChat }) {
   const [filter, setFilter] = useState(null);
 
   return (
@@ -32,6 +32,18 @@ function Home() {
             </div>
           </div>
         </div>
+        
+        {/* Flying Turtle - Click to open chat */}
+        {onOpenChat && (
+          <div 
+            className="bouncing-turtle clickable-turtle" 
+            onClick={onOpenChat}
+            title="🐢 Click me to chat with Terry the Turtle!"
+          >
+            🐢
+            <div className="turtle-speech-bubble">Click me!</div>
+          </div>
+        )}
       </div>
 
       <div className="filter-section">
