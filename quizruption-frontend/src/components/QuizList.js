@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getQuizzes } from '../services/api';
 
-function QuizList({ filter }) {
+function QuizList({ filter, limit, showTitle = true }) {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +13,9 @@ function QuizList({ filter }) {
       try {
         setLoading(true);
         const data = await getQuizzes(filter);
-        setQuizzes(data);
+        // Limit the number of quizzes shown if limit is provided
+        const limitedData = limit ? data.slice(0, limit) : data;
+        setQuizzes(limitedData);
         setError(null);
       } catch (err) {
         setError('Failed to load quizzes');
@@ -24,20 +26,20 @@ function QuizList({ filter }) {
     };
 
     fetchQuizzes();
-  }, [filter]);
+  }, [filter, limit]);
 
   if (loading) return <div className="loading">Loading quizzes...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="quiz-list">
+      {showTitle && <h2 className="section-title">🌟 Recently Created Quizzes</h2>}
       {quizzes.length === 0 ? (
         <div className="empty-state">
           <div className="empty-content">
             <div className="empty-icon">🎯</div>
-            <h2>No Quizzes Yet!</h2>
+            <h3>No Quizzes Yet!</h3>
             <p>Be the first to create a quiz and share it with the community.</p>
-            <p>Get started by clicking the "Create Quiz" button above!</p>
             <div className="empty-actions">
               <Link to="/create" className="btn-primary">✨ Create Your First Quiz</Link>
             </div>
@@ -83,6 +85,11 @@ function QuizList({ filter }) {
               </div>
             </div>
           ))}
+          {limit && quizzes.length >= limit && (
+            <div className="view-more">
+              <Link to="/quiz" className="btn-outline">View All Quizzes →</Link>
+            </div>
+          )}
         </div>
       )}
     </div>
