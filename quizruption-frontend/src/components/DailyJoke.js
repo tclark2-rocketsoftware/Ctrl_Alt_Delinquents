@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getDailyJoke, nextAvailableDate } from '../services/jokeService';
+import { useAuth } from '../contexts/AuthContext';
 
-function DailyJoke() {
+function DailyJoke({ onOpenChat }) {
+  const { user } = useAuth();
   const [joke, setJoke] = useState('');
   const [source, setSource] = useState('');
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,10 @@ function DailyJoke() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ suggestion_text: suggestion.trim() })
+          body: JSON.stringify({ 
+            suggestion_text: suggestion.trim(),
+            user_id: user?.id || null
+          })
         });
 
         if (response.ok) {
@@ -117,10 +122,16 @@ function DailyJoke() {
         </div>
       )}
       
-      <div className="bouncing-turtle">
-        🐢
-        <div className="turtle-speech-bubble">HELLO</div>
-      </div>
+      {onOpenChat && (
+        <div 
+          className="bouncing-turtle clickable-turtle" 
+          onClick={onOpenChat}
+          title="🐢 Click me to chat with Terry the Turtle!"
+        >
+          🐢
+          <div className="turtle-speech-bubble">Chat with me!</div>
+        </div>
+      )}
       
       <div className="daily-joke-card">
         <h1>Daily Joke</h1>

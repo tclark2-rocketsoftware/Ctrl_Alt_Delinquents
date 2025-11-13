@@ -1,9 +1,10 @@
 // Home page
 import React, { useState } from 'react';
 import QuizList from '../components/QuizList';
+import TriviaList from '../components/TriviaList';
 import DailyJoke from '../components/DailyJoke';
 
-function Home() {
+function Home({ onOpenChat }) {
   const [filter, setFilter] = useState(null);
 
   return (
@@ -16,46 +17,32 @@ function Home() {
               Transform your mind through interactive quizzes and trivia! Discover your personality, 
               challenge your knowledge, and have fun while learning about yourself and the world around you.
             </p>
-            <div className="feature-highlights">
-              <div className="feature">
-                <span className="feature-icon">🌟</span>
-                <span className="feature-text">Personality Tests</span>
-              </div>
-              <div className="feature">
-                <span className="feature-icon">🧠</span>
-                <span className="feature-text">Mind-Bending Trivia</span>
-              </div>
-              <div className="feature">
-                <span className="feature-icon">🎲</span>
-                <span className="feature-text">Daily Challenges</span>
-              </div>
-            </div>
+          </div>
+        </div>
+        
+        {/* Flying Turtle - Click to open chat */}
+        {onOpenChat && (
+          <div 
+            className="bouncing-turtle clickable-turtle" 
+            onClick={onOpenChat}
+            title="🐢 Click me to chat with Terry the Turtle!"
+          >
+            🐢
+            <div className="turtle-speech-bubble">Click me!</div>
+          </div>
+        )}
+      </div>
+
+      <div className="home-content">
+        <div className="quiz-trivia-container">
+          <div className="quiz-section">
+            <QuizList filter="personality" limit={5} showTitle={true} />
+          </div>
+          <div className="trivia-section">
+            <TriviaList limit={5} />
           </div>
         </div>
       </div>
-
-      <div className="filter-section">
-        <button 
-          className={`filter-btn ${filter === null ? 'active' : ''}`}
-          onClick={() => setFilter(null)}
-        >
-          🎲 All Quizzes
-        </button>
-        <button 
-          className={`filter-btn ${filter === 'trivia' ? 'active' : ''}`}
-          onClick={() => setFilter('trivia')}
-        >
-          🧠 Trivia
-        </button>
-        <button 
-          className={`filter-btn ${filter === 'personality' ? 'active' : ''}`}
-          onClick={() => setFilter('personality')}
-        >
-          🌟 Personality
-        </button>
-      </div>
-
-      <QuizList filter={filter} />
       
       {/* Daily Joke Section */}
       <div className="home-joke-section">

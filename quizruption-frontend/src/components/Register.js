@@ -38,8 +38,7 @@ function Register({ onRegister }) {
     }
 
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('http://localhost:8000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,13 +51,17 @@ function Register({ onRegister }) {
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        onRegister(userData);
+        const data = await response.json();
+        // Store the access token
+        localStorage.setItem('authToken', data.access_token);
+        // Pass the user object to onRegister (which calls login)
+        onRegister(data.user);
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Registration failed');
+        setError(errorData.detail || errorData.message || 'Registration failed');
       }
     } catch (err) {
+      console.error('Registration error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);

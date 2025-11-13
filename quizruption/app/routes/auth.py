@@ -3,13 +3,13 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.database import get_db
-from app.models import User, Quiz, Result
+from app.models import User, Quiz, Result, JokeSuggestion
 from app import schemas
 import jwt
 from datetime import datetime, timedelta
 from typing import List
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 # JWT Secret key (in production, this should be in environment variables)
 SECRET_KEY = "your-secret-key-here"
@@ -185,21 +185,32 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     quizzes_created = db.query(Quiz).filter(Quiz.created_by == user_id).all()
     
     # Get quizzes taken by user (results)
-    results = db.query(Result).filter(Result.user_id == user_id).all()
+    results = db.query(Result).filter(Result.user_id == user_id).order_by(Result.created_at.desc()).all()
+    
+    # Get personality results (separate from trivia)
+    personality_results = [r for r in results if r.personality]
+    trivia_results = [r for r in results if r.score is not None and not r.personality]
     
     # Get unique personality traits discovered
-    personality_traits = list(set([r.personality for r in results if r.personality]))
+    personality_traits = list(set([r.personality for r in personality_results]))
+    
+    # Get joke suggestions made by user
+    joke_suggestions = db.query(JokeSuggestion).filter(
+        JokeSuggestion.user_id == user_id
+    ).order_by(JokeSuggestion.created_at.desc()).all()
     
     # Get recent activity
     recent_quizzes = db.query(Quiz).filter(Quiz.created_by == user_id).order_by(Quiz.created_at.desc()).limit(5).all()
-    recent_results = db.query(Result).filter(Result.user_id == user_id).order_by(Result.created_at.desc()).limit(5).all()
     
     return {
         "user": user.to_public_dict(),
         "stats": {
             "quizzes_created": len(quizzes_created),
             "quizzes_taken": len(results),
+            "personality_quizzes_taken": len(personality_results),
+            "trivia_quizzes_taken": len(trivia_results),
             "personality_traits_discovered": len(personality_traits),
+            "joke_suggestions_submitted": len(joke_suggestions),
             "member_since": user.created_at.isoformat() if user.created_at else None
         },
         "quizzes_created": [
@@ -211,6 +222,30 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
                 "created_at": q.created_at.isoformat() if q.created_at else None
             } for q in quizzes_created
         ],
+        "personality_results": [
+            {
+                "id": r.id,
+                "quiz_id": r.quiz_id,
+                "personality": r.personality,
+                "created_at": r.created_at.isoformat() if r.created_at else None
+            } for r in personality_results
+        ],
+        "trivia_results": [
+            {
+                "id": r.id,
+                "quiz_id": r.quiz_id,
+                "score": r.score,
+                "created_at": r.created_at.isoformat() if r.created_at else None
+            } for r in trivia_results
+        ],
+        "joke_suggestions": [
+            {
+                "id": s.id,
+                "suggestion_text": s.suggestion_text,
+                "used": s.used,
+                "created_at": s.created_at.isoformat() if s.created_at else None
+            } for s in joke_suggestions
+        ],
         "personality_traits": personality_traits,
         "recent_activity": {
             "recent_quizzes": [
@@ -220,15 +255,6 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
                     "type": q.type,
                     "created_at": q.created_at.isoformat() if q.created_at else None
                 } for q in recent_quizzes
-            ],
-            "recent_results": [
-                {
-                    "id": r.id,
-                    "quiz_id": r.quiz_id,
-                    "personality": r.personality,
-                    "score": r.score,
-                    "created_at": r.created_at.isoformat() if r.created_at else None
-                } for r in recent_results
             ]
         }
     }

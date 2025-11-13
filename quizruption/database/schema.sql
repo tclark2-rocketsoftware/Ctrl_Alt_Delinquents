@@ -75,7 +75,8 @@ CREATE TABLE IF NOT EXISTS joke_suggestions (
     suggestion_text TEXT NOT NULL,
     user_id INTEGER,
     used BOOLEAN DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Create indexes for better performance

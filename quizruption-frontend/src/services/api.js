@@ -94,4 +94,13 @@ export const getUserResults = async (userId) => {
   return response.data;
 };
 
+// Chat endpoints
+export const sendChatMessage = async (message, conversationHistory = null) => {
+  const response = await api.post('/chat', {
+    message,
+    conversation_history: conversationHistory
+  });
+  return response.data;
+};
+
 export default api;

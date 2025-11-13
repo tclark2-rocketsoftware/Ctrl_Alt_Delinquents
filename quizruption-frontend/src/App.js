@@ -1,8 +1,9 @@
 // Main app component
-import React from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Login from './components/Login';
 import Register from './components/Register';
 import Home from './pages/Home';
@@ -14,6 +15,7 @@ import DailyJoke from './components/DailyJoke';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import CreateQuiz from './components/CreateQuiz';
+import TurtleChatBot from './components/TurtleChatBot';
 import './styles/main.css';
 
 // Protected Route component
@@ -40,6 +42,13 @@ function PublicRoute({ children }) {
 
 function AppContent() {
   const { login, logout } = useAuth();
+  const chatBotRef = useRef(null);
+
+  const handleOpenChat = () => {
+    if (chatBotRef.current) {
+      chatBotRef.current.openChat();
+    }
+  };
 
   return (
     <div className="App">
@@ -55,7 +64,7 @@ function AppContent() {
             <Register onRegister={login} />
           </PublicRoute>
         } />
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home onOpenChat={handleOpenChat} />} />
         <Route path="/quiz" element={<QuizListPage />} />
         <Route path="/trivia" element={<TriviaPage />} />
         <Route path="/dashboard" element={
@@ -83,8 +92,10 @@ function AppContent() {
             <ResultPage />
           </ProtectedRoute>
         } />
-        <Route path="/daily-joke" element={<DailyJoke />} />
+        <Route path="/daily-joke" element={<DailyJoke onOpenChat={handleOpenChat} />} />
       </Routes>
+      <TurtleChatBot ref={chatBotRef} />
+      <Footer />
     </div>
   );
 }
