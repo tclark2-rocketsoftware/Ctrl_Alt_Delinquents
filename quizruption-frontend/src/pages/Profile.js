@@ -203,6 +203,73 @@ function Profile() {
                 <div className="stat-number">{stats.stats.personality_traits_discovered}</div>
                 <div className="stat-label">Traits Discovered</div>
               </div>
+              <div className="stat-card">
+                <div className="stat-number">{stats.stats.joke_suggestions_submitted || 0}</div>
+                <div className="stat-label">Joke Suggestions</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Personality Results */}
+        {stats && stats.personality_results && stats.personality_results.length > 0 && (
+          <div className="results-section">
+            <h2>🌟 Personality Quiz Results</h2>
+            <div className="results-grid">
+              {stats.personality_results.map((result) => (
+                <div key={result.id} className="result-card personality-result">
+                  <div className="result-icon">🎭</div>
+                  <h3>{result.personality}</h3>
+                  <p className="result-date">
+                    {new Date(result.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Trivia Results */}
+        {stats && stats.trivia_results && stats.trivia_results.length > 0 && (
+          <div className="results-section">
+            <h2>🧠 Trivia Quiz Results</h2>
+            <div className="results-grid">
+              {stats.trivia_results.map((result) => (
+                <div key={result.id} className="result-card trivia-result">
+                  <div className="result-icon">🎯</div>
+                  <h3>Score: {result.score}</h3>
+                  <p className="result-date">
+                    {new Date(result.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Joke Suggestions */}
+        {stats && stats.joke_suggestions && stats.joke_suggestions.length > 0 && (
+          <div className="suggestions-section">
+            <h2>😂 Your Joke Suggestions</h2>
+            <div className="suggestions-list">
+              {stats.joke_suggestions.map((suggestion) => (
+                <div key={suggestion.id} className="suggestion-card">
+                  <div className="suggestion-content">
+                    <p className="suggestion-text">"{suggestion.suggestion_text}"</p>
+                    <div className="suggestion-meta">
+                      <span className="suggestion-date">
+                        {new Date(suggestion.created_at).toLocaleDateString()}
+                      </span>
+                      {suggestion.used && (
+                        <span className="suggestion-badge used">✓ Used</span>
+                      )}
+                      {!suggestion.used && (
+                        <span className="suggestion-badge pending">⏳ Pending</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

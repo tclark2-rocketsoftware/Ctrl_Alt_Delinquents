@@ -687,7 +687,9 @@ body {
 
 .personality-section,
 .created-quizzes-section,
-.activity-section {
+.activity-section,
+.results-section,
+.suggestions-section {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -697,7 +699,9 @@ body {
 
 .personality-section h2,
 .created-quizzes-section h2,
-.activity-section h2 {
+.activity-section h2,
+.results-section h2,
+.suggestions-section h2 {
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -773,6 +777,121 @@ body {
 .activity-date {
   font-size: 0.8rem;
   opacity: 0.7;
+}
+
+/* Results Section */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.personality-result {
+  border-color: rgba(186, 153, 220, 0.5);
+}
+
+.trivia-result {
+  border-color: rgba(204, 149, 175, 0.5);
+}
+
+.result-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.result-card h3 {
+  font-size: 1.2rem;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-transform: capitalize;
+}
+
+.result-date {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Suggestions Section */
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.suggestion-card {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid rgba(186, 153, 220, 0.6);
+}
+
+.suggestion-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.suggestion-text {
+  font-size: 1rem;
+  color: white;
+  line-height: 1.6;
+  font-style: italic;
+  margin: 0;
+}
+
+.suggestion-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.suggestion-date {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.suggestion-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.suggestion-badge.used {
+  background: rgba(39, 174, 96, 0.3);
+  color: #a8e6a8;
+  border: 1px solid rgba(39, 174, 96, 0.5);
+}
+
+.suggestion-badge.pending {
+  background: rgba(243, 156, 18, 0.3);
+  color: #f9d97f;
+  border: 1px solid rgba(243, 156, 18, 0.5);
 }
 
 /* Responsive Design for Profile */

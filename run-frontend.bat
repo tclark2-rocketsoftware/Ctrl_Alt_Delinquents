@@ -30,5 +30,4 @@ echo.
 
 REM Start the React development server
 call npm start
-
-pause
+REM Removed pause so server stays running for immediate browser access

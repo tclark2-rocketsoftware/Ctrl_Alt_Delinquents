@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getDailyJoke, nextAvailableDate } from '../services/jokeService';
+import { useAuth } from '../contexts/AuthContext';
 
 function DailyJoke() {
+  const { user } = useAuth();
   const [joke, setJoke] = useState('');
   const [source, setSource] = useState('');
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,10 @@ function DailyJoke() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ suggestion_text: suggestion.trim() })
+          body: JSON.stringify({ 
+            suggestion_text: suggestion.trim(),
+            user_id: user?.id || null
+          })
         });
 
         if (response.ok) {
