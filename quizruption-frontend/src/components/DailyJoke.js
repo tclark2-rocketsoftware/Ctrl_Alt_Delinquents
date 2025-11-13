@@ -13,9 +13,6 @@ function DailyJoke() {
   const [suggestion, setSuggestion] = useState('');
   const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem('jokeDarkMode') === 'true';
-  });
   const [visitStreak, setVisitStreak] = useState(() => {
     const streak = localStorage.getItem('jokeVisitStreak');
     return streak ? JSON.parse(streak) : { count: 0, lastVisit: null };
@@ -99,14 +96,8 @@ function DailyJoke() {
     }
   };
 
-  const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    localStorage.setItem('jokeDarkMode', newMode);
-  };
-
   if (loading) return (
-    <div className={`loading-skeleton ${darkMode ? 'dark-mode' : ''}`}>
+    <div className="loading-skeleton">
       <div className="skeleton-card">
         <div className="skeleton-title"></div>
         <div className="skeleton-text"></div>
@@ -119,11 +110,7 @@ function DailyJoke() {
   if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className={`daily-joke-page ${darkMode ? 'dark-mode' : ''}`}>
-      <button className="dark-mode-toggle" onClick={toggleDarkMode} title="Toggle dark mode">
-        {darkMode ? '☀️' : '🌙'}
-      </button>
-      
+    <div className="daily-joke-page">
       {visitStreak.count >= 3 && (
         <div className="streak-badge">
           🔥 {visitStreak.count} Day Streak!

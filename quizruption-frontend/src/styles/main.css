@@ -216,6 +216,12 @@ body {
   }
 }
 
+/* Home page joke section */
+.home-joke-section {
+  margin-top: 5rem;
+  margin-bottom: 3rem;
+}
+
 /* Quiz list */
 .quiz-grid {
   display: grid;
@@ -936,39 +942,11 @@ body {
 
 /* Daily Joke Page */
 .daily-joke-page {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
   position: relative;
-  overflow: hidden;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.daily-joke-page.dark-mode {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
-  min-height: 100vh;
-}
-
-.dark-mode-toggle {
-  position: fixed;
-  top: 80px;
-  right: 2rem;
-  background: #3498db;
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 1000;
-  transition: all 0.3s;
-}
-
-.dark-mode-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  overflow: visible;
 }
 
 .streak-badge {
@@ -1089,10 +1067,12 @@ body {
 }
 
 .daily-joke-card {
-  background: white;
-  padding: 2rem 2.5rem;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 2.5rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
   animation: cardFadeIn 0.5s ease-out;
@@ -1109,30 +1089,22 @@ body {
   }
 }
 
-.dark-mode .daily-joke-card {
-  background: #2d2d2d;
-  color: #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-}
-
-.daily-joke-card:before {
+.daily-joke-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(90deg,#3498db,#8e44ad,#27ae60);
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #cc95af 0%, #ba99dc 100%);
 }
 
 .daily-joke-card h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #2c3e50;
-}
-
-.dark-mode .daily-joke-card h1 {
-  color: #f0f0f0;
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .joke-actions {
@@ -1142,21 +1114,21 @@ body {
 }
 
 .copy-btn {
-  background: #27ae60;
+  background: linear-gradient(135deg, #cc95af 0%, #ba99dc 100%);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 500;
   transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(186, 153, 220, 0.3);
 }
 
 .copy-btn:hover {
-  background: #229954;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 25px rgba(186, 153, 220, 0.4);
 }
 
 .copy-btn:active {
@@ -1165,26 +1137,19 @@ body {
 
 
 .joke-text {
-  font-size: 1.2rem;
-  line-height: 1.6;
-  margin: 1rem 0 1.5rem;
-  color: #34495e;
-}
-
-.dark-mode .joke-text {
-  color: #d0d0d0;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  margin: 1.5rem 0 2rem;
+  color: #2d3748;
+  font-weight: 400;
 }
 
 .joke-author {
   font-size: 1rem;
   font-style: italic;
-  color: #7f8c8d;
+  color: #718096;
   margin: 0.5rem 0 1.5rem;
   text-align: right;
-}
-
-.dark-mode .joke-author {
-  color: #95a5a6;
 }
 
 .joke-gif-wrapper {
@@ -1247,31 +1212,21 @@ body {
 .joke-suggestion-section {
   margin-top: 2.5rem;
   padding-top: 2rem;
-  border-top: 2px solid #ecf0f1;
-}
-
-.dark-mode .joke-suggestion-section {
-  border-top-color: #4a4a4a;
+  border-top: 2px solid rgba(186, 153, 220, 0.2);
 }
 
 .joke-suggestion-section h3 {
   font-size: 1.3rem;
-  color: #2c3e50;
+  color: #2d3748;
   margin-bottom: 0.5rem;
-}
-
-.dark-mode .joke-suggestion-section h3 {
-  color: #f0f0f0;
+  font-weight: 600;
 }
 
 .suggestion-description {
   font-size: 0.9rem;
-  color: #7f8c8d;
+  color: #718096;
   margin-bottom: 1rem;
-}
-
-.dark-mode .suggestion-description {
-  color: #a0a0a0;
+  line-height: 1.6;
 }
 
 .suggestion-form {
@@ -1283,49 +1238,52 @@ body {
 .char-counter {
   align-self: flex-end;
   font-size: 0.8rem;
-  color: #7f8c8d;
+  color: #718096;
   margin-bottom: -0.5rem;
-}
-
-.dark-mode .char-counter {
-  color: #a0a0a0;
 }
 
 .suggestion-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  padding: 0.875rem;
+  border: 2px solid rgba(186, 153, 220, 0.3);
+  border-radius: 12px;
   font-size: 1rem;
   font-family: inherit;
   resize: vertical;
-  transition: border-color 0.3s;
-}
-
-.dark-mode .suggestion-input {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .suggestion-input:focus {
   outline: none;
-  border-color: #3498db;
-}
-
-.dark-mode .suggestion-input:focus {
-  border-color: #5dade2;
+  border-color: #ba99dc;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(186, 153, 220, 0.1);
 }
 
 .suggestion-btn {
   align-self: flex-start;
-  min-width: 180px;
+  min-width: 200px;
+  background: linear-gradient(135deg, #cc95af 0%, #ba99dc 100%);
+  color: white;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(186, 153, 220, 0.3);
+}
+
+.suggestion-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(186, 153, 220, 0.4);
 }
 
 .suggestion-btn:disabled {
-  background-color: #27ae60;
+  background: linear-gradient(135deg, #a8d5a8 0%, #7bc87b 100%);
   cursor: default;
+  opacity: 0.9;
 }
 
 .suggestion-success {

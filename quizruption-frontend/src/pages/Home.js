@@ -1,6 +1,7 @@
 // Home page
 import React, { useState } from 'react';
 import QuizList from '../components/QuizList';
+import DailyJoke from '../components/DailyJoke';
 
 function Home() {
   const [filter, setFilter] = useState(null);
@@ -34,6 +35,11 @@ function Home() {
       </div>
 
       <QuizList filter={filter} />
+      
+      {/* Daily Joke Section */}
+      <div className="home-joke-section">
+        <DailyJoke />
+      </div>
     </div>
   );
 }
