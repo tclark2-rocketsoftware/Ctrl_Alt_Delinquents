@@ -98,7 +98,12 @@ function QuizListPage() {
         </div>
       </div>
 
-      <QuizList filter={selectedTags.length === 0 ? null : selectedTags} showTitle={false} />
+      <QuizList 
+        filter={selectedTags.length === 0 ? null : selectedTags} 
+        showTitle={false} 
+        type="personality"
+        title="🌟 Personality Quizzes"
+      />
     </div>
   );
 }

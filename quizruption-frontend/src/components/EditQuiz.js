@@ -1,13 +1,19 @@
-// Content creation form (Quizzes and Trivia)
-import React, { useState } from 'react';
-import { createQuiz } from '../services/api';
+// Edit existing quiz/trivia content
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getQuiz, updateQuiz } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
-function CreateQuiz() {
+function EditQuiz() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
   const [quizData, setQuizData] = useState({
     title: '',
     description: '',
     type: 'personality',
-    tags: [], // Add tags array
+    tags: [],
     questions: [
       {
         text: '',
@@ -18,7 +24,9 @@ function CreateQuiz() {
       }
     ]
   });
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [originalCreator, setOriginalCreator] = useState(null);
 
   // Available tags for quiz categorization
   const availableTags = [
@@ -42,6 +50,45 @@ function CreateQuiz() {
     { id: 'general', label: 'General Knowledge', emoji: '🧠', color: '#5f27cd' },
     { id: 'other', label: 'Other', emoji: '🎲', color: '#ff7675' }
   ];
+
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const quiz = await getQuiz(id);
+        
+        // Check if user is the creator
+        if (quiz.created_by !== user?.id) {
+          setMessage('You can only edit quizzes that you created.');
+          setTimeout(() => navigate('/'), 3000);
+          return;
+        }
+        
+        setOriginalCreator(quiz.created_by);
+        setQuizData({
+          title: quiz.title,
+          description: quiz.description,
+          type: quiz.type,
+          tags: quiz.tags || [],
+          questions: quiz.questions.map(q => ({
+            text: q.text,
+            answers: q.answers.map(a => ({
+              text: a.text,
+              is_correct: a.is_correct || false,
+              personality_tag: a.personality_tag || ''
+            }))
+          }))
+        });
+        setLoading(false);
+      } catch (error) {
+        setMessage('Error loading quiz: ' + error.message);
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchQuiz();
+    }
+  }, [id, user, navigate]);
 
   const handleQuizChange = (field, value) => {
     if (field === 'type') {
@@ -99,39 +146,49 @@ function CreateQuiz() {
     setQuizData({ ...quizData, questions });
   };
 
+  const removeQuestion = (qIndex) => {
+    if (quizData.questions.length <= 1) {
+      setMessage('A quiz must have at least one question.');
+      return;
+    }
+    
+    const questions = quizData.questions.filter((_, index) => index !== qIndex);
+    setQuizData({ ...quizData, questions });
+  };
+
+  const removeAnswer = (qIndex, aIndex) => {
+    const questions = [...quizData.questions];
+    if (questions[qIndex].answers.length <= 2) {
+      setMessage('Each question must have at least two answers.');
+      return;
+    }
+    
+    questions[qIndex].answers = questions[qIndex].answers.filter((_, index) => index !== aIndex);
+    setQuizData({ ...quizData, questions });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createQuiz(quizData);
+      await updateQuiz(id, quizData);
       const contentType = quizData.type === 'personality' ? 'Quiz' : 'Trivia';
-      setMessage(`${contentType} created successfully! 🎉`);
-      // Reset form
-      setQuizData({
-        title: '',
-        description: '',
-        type: 'personality',
-        tags: [],
-        questions: [
-          {
-            text: '',
-            answers: [
-              { text: '', is_correct: false, personality_tag: '' },
-              { text: '', is_correct: false, personality_tag: '' }
-            ]
-          }
-        ]
-      });
+      setMessage(`${contentType} updated successfully! 🎉`);
+      setTimeout(() => navigate(`/quiz/${id}`), 2000);
     } catch (error) {
       const contentType = quizData.type === 'personality' ? 'quiz' : 'trivia';
-      setMessage(`Error creating ${contentType}: ${error.message}`);
+      setMessage(`Error updating ${contentType}: ${error.message}`);
     }
   };
+
+  if (loading) {
+    return <div className="loading">Loading quiz data...</div>;
+  }
 
   return (
     <div className="create-quiz">
       <div className="page-header">
-        <h1>Create New Content</h1>
-        <p>Create either a fun BuzzFeed-style personality quiz or a traditional knowledge-testing trivia quiz!</p>
+        <h1>Edit Content</h1>
+        <p>Update your {quizData.type === 'personality' ? 'personality quiz' : 'trivia quiz'}. Make changes and save to update the content for everyone!</p>
       </div>
       {message && <div className="message">{message}</div>}
       
@@ -198,27 +255,51 @@ function CreateQuiz() {
           <h3>Questions</h3>
           {quizData.questions.map((question, qIndex) => (
             <div key={qIndex} className="question-block">
-              <div className="form-group">
-                <label>Question {qIndex + 1}</label>
-                <input
-                  type="text"
-                  value={question.text}
-                  onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
-                  required
-                />
+              <div className="question-header">
+                <div className="form-group">
+                  <label>Question {qIndex + 1}</label>
+                  <input
+                    type="text"
+                    value={question.text}
+                    onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
+                    required
+                  />
+                </div>
+                {quizData.questions.length > 1 && (
+                  <button 
+                    type="button" 
+                    onClick={() => removeQuestion(qIndex)} 
+                    className="btn-danger-small"
+                    title="Remove Question"
+                  >
+                    🗑️
+                  </button>
+                )}
               </div>
 
               <div className="answers-section">
                 <h4>Answers</h4>
                 {question.answers.map((answer, aIndex) => (
                   <div key={aIndex} className="answer-block">
-                    <input
-                      type="text"
-                      placeholder="Answer text"
-                      value={answer.text}
-                      onChange={(e) => handleAnswerChange(qIndex, aIndex, 'text', e.target.value)}
-                      required
-                    />
+                    <div className="answer-row">
+                      <input
+                        type="text"
+                        placeholder="Answer text"
+                        value={answer.text}
+                        onChange={(e) => handleAnswerChange(qIndex, aIndex, 'text', e.target.value)}
+                        required
+                      />
+                      {question.answers.length > 2 && (
+                        <button 
+                          type="button" 
+                          onClick={() => removeAnswer(qIndex, aIndex)} 
+                          className="btn-danger-small"
+                          title="Remove Answer"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
                     
                     {quizData.type === 'trivia' ? (
                       <label className="correct-answer-label">
@@ -256,12 +337,17 @@ function CreateQuiz() {
           </button>
         </div>
 
-        <button type="submit" className="btn-primary">
-          {quizData.type === 'personality' ? 'Create Personality Quiz' : 'Create Trivia Quiz'}
-        </button>
+        <div className="form-actions">
+          <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" className="btn-primary">
+            {quizData.type === 'personality' ? 'Update Personality Quiz' : 'Update Trivia Quiz'}
+          </button>
+        </div>
       </form>
     </div>
   );
 }
 
-export default CreateQuiz;
+export default EditQuiz;
