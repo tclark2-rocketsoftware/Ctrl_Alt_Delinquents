@@ -9,7 +9,7 @@ cd /d "%~dp0quizruption"
 REM Check if virtual environment exists
 if not exist "venv\" (
     echo Creating virtual environment...
-    py -m venv venv
+    python -m venv venv
     echo.
 )
 
@@ -19,7 +19,7 @@ call venv\Scripts\activate.bat
 
 REM Check if requirements are installed
 echo Checking dependencies...
-pip install -r requirements.txt --quiet
+pip install -r requirements.txt 
 
 echo.
 echo ===============================================
