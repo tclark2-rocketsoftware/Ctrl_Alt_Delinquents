@@ -53,11 +53,60 @@ class QuizCreate(QuizBase):
     created_by: Optional[int] = None
 
 
+# User schemas for nested relationships
+class QuizCreator(BaseModel):
+    id: int
+    username: str
+    display_name: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# User profile schemas
+class UserProfileUpdate(BaseModel):
+    display_name: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    profile_image_url: Optional[str] = None
+
+class UserProfile(BaseModel):
+    id: int
+    username: str
+    email: str
+    display_name: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+class UserPublicProfile(BaseModel):
+    id: int
+    username: str
+    display_name: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
 class Quiz(QuizBase):
     id: int
     created_by: Optional[int]
     created_at: datetime
     questions: List[Question] = []
+    creator: Optional[QuizCreator] = None  # Include creator information
     
     class Config:
         from_attributes = True

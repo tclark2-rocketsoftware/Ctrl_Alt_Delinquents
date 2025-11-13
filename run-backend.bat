@@ -16,10 +16,18 @@ if not exist "venv\" (
 REM Activate virtual environment
 echo Activating virtual environment...
 call venv\Scripts\activate.bat
+if errorlevel 1 (
+    echo Note: Using direct Python path due to activation policy...
+    set PYTHON_PATH=venv\Scripts\python.exe
+) else (
+    set PYTHON_PATH=python
+)
 
 REM Check if requirements are installed
 echo Checking dependencies...
-pip install -r requirements.txt 
+venv\Scripts\pip.exe install --upgrade pip
+venv\Scripts\pip.exe install --only-binary :all: -r requirements.txt || venv\Scripts\pip.exe install -r requirements.txt
+echo. 
 
 echo.
 echo ===============================================
@@ -30,6 +38,13 @@ echo ===============================================
 echo.
 
 REM Start the FastAPI server
-uvicorn app.main:app --reload --env-file .env
+if exist "venv\Scripts\uvicorn.exe" (
+    venv\Scripts\uvicorn.exe app.main:app --reload
+) else (
+    echo ERROR: uvicorn not found! Dependencies may not have installed correctly.
+    echo Please check the error messages above.
+    pause
+    exit /b 1
+)
 
 pause

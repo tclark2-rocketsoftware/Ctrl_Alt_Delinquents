@@ -32,17 +32,55 @@ function QuizList({ filter }) {
   return (
     <div className="quiz-list">
       {quizzes.length === 0 ? (
-        <p>No quizzes available</p>
+        <div className="empty-state">
+          <div className="empty-content">
+            <div className="empty-icon">🎯</div>
+            <h2>No Quizzes Yet!</h2>
+            <p>Be the first to create a quiz and share it with the community.</p>
+            <p>Get started by clicking the "Create Quiz" button above!</p>
+            <div className="empty-actions">
+              <Link to="/create" className="btn-primary">✨ Create Your First Quiz</Link>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="quiz-grid">
           {quizzes.map((quiz) => (
             <div key={quiz.id} className="quiz-card">
               <h3>{quiz.title}</h3>
               <p>{quiz.description}</p>
-              <span className="quiz-type">{quiz.type}</span>
-              <Link to={`/quiz/${quiz.id}`} className="btn-primary">
-                Start Quiz
-              </Link>
+              <div className="quiz-meta">
+                <span className="quiz-type">{quiz.type}</span>
+                <span className="quiz-questions">
+                  {quiz.questions?.length || 0} questions
+                </span>
+              </div>
+              
+              {/* Creator Information */}
+              {quiz.creator && (
+                <div className="quiz-creator">
+                  <div className="creator-avatar">
+                    {quiz.creator.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="creator-info">
+                    <div className="creator-name">
+                      Created by <strong>{quiz.creator.username}</strong>
+                    </div>
+                    <div className="creator-date">
+                      {new Date(quiz.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="quiz-actions">
+                <Link to={`/quiz/${quiz.id}`} className="btn-primary">
+                  🚀 Start Quiz
+                </Link>
+                <Link to={`/quiz/${quiz.id}/details`} className="btn-secondary">
+                  📖 Details
+                </Link>
+              </div>
             </div>
           ))}
         </div>
