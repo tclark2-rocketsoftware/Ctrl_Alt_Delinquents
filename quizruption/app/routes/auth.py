@@ -201,6 +201,7 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     
     # Get recent activity
     recent_quizzes = db.query(Quiz).filter(Quiz.created_by == user_id).order_by(Quiz.created_at.desc()).limit(5).all()
+    recent_results = db.query(Result).filter(Result.user_id == user_id).order_by(Result.created_at.desc()).limit(5).all()
     
     return {
         "user": user.to_public_dict(),
@@ -255,6 +256,15 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
                     "type": q.type,
                     "created_at": q.created_at.isoformat() if q.created_at else None
                 } for q in recent_quizzes
+            ],
+            "recent_results": [
+                {
+                    "id": r.id,
+                    "quiz_id": r.quiz_id,
+                    "personality": r.personality,
+                    "score": r.score,
+                    "created_at": r.created_at.isoformat() if r.created_at else None
+                } for r in recent_results
             ]
         }
     }
