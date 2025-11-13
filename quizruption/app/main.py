@@ -1,13 +1,17 @@
 # FastAPI entry point
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from app.database import engine, Base
-from app.routes import quizzes, answers, results, auth
+from app.routes import quizzes, answers, results, auth, chat
 from app.routes import jokes
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 """Configure application logging to file and create DB tables."""
 # Ensure logs directory (optional); write in app root by default
@@ -42,6 +46,7 @@ app.include_router(quizzes.router, prefix="/api/quizzes", tags=["quizzes"])
 app.include_router(answers.router, prefix="/api/answers", tags=["answers"])
 app.include_router(results.router, prefix="/api/results", tags=["results"])
 app.include_router(jokes.router, prefix="/api/jokes", tags=["jokes"])
+app.include_router(chat.router, prefix="/api", tags=["chat"])
 
 @app.on_event("startup")
 async def _setup_logging_after_startup():

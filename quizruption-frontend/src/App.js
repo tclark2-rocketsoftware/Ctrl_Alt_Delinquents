@@ -14,6 +14,7 @@ import DailyJoke from './components/DailyJoke';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import CreateQuiz from './components/CreateQuiz';
+import TurtleChatBot from './components/TurtleChatBot';
 import './styles/main.css';
 
 // Protected Route component
@@ -85,6 +86,7 @@ function AppContent() {
         } />
         <Route path="/daily-joke" element={<DailyJoke />} />
       </Routes>
+      <TurtleChatBot />
     </div>
   );
 }
