@@ -7,6 +7,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Home from './pages/Home';
 import QuizPage from './pages/QuizPage';
+import QuizListPage from './pages/QuizListPage';
+import TriviaPage from './pages/TriviaPage';
 import ResultPage from './pages/ResultPage';
 import DailyJoke from './components/DailyJoke';
 import Dashboard from './pages/Dashboard';
@@ -54,6 +56,8 @@ function AppContent() {
           </PublicRoute>
         } />
         <Route path="/" element={<Home />} />
+        <Route path="/quiz" element={<QuizListPage />} />
+        <Route path="/trivia" element={<TriviaPage />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
