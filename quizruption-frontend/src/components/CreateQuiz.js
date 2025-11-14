@@ -8,13 +8,13 @@ function CreateQuiz() {
     description: '',
     type: 'personality',
     tags: [], // Add tags array
-    personalities: [], // New: Multiple personality outcomes
+    personalities: [], // Personality outcomes definitions
     questions: [
       {
         text: '',
         answers: [
-          { text: '', is_correct: false, personality_weights: {} },
-          { text: '', is_correct: false, personality_weights: {} }
+          { text: '', is_correct: false, personality_tag: '' },
+          { text: '', is_correct: false, personality_tag: '' }
         ]
       }
     ]
@@ -88,23 +88,16 @@ function CreateQuiz() {
   };
 
   const removePersonality = (index) => {
+    const removedId = quizData.personalities[index].id;
     const personalities = quizData.personalities.filter((_, i) => i !== index);
-    
-    // Clean up weights in all answers
-    const questions = quizData.questions.map(question => ({
-      ...question,
-      answers: question.answers.map(answer => {
-        const newWeights = { ...answer.personality_weights };
-        delete newWeights[quizData.personalities[index].id];
-        return { ...answer, personality_weights: newWeights };
-      })
+    // Clear personality_tag references that pointed to removed outcome
+    const questions = quizData.questions.map(q => ({
+      ...q,
+      answers: q.answers.map(a => (
+        a.personality_tag === removedId ? { ...a, personality_tag: '' } : a
+      ))
     }));
-    
-    setQuizData({ 
-      ...quizData, 
-      personalities,
-      questions
-    });
+    setQuizData({ ...quizData, personalities, questions });
   };
 
   // Handle personality image upload
@@ -170,13 +163,10 @@ function CreateQuiz() {
     setQuizData({ ...quizData, questions });
   };
 
-  // Handle personality weight changes
-  const handleWeightChange = (qIndex, aIndex, personalityId, weight) => {
+  // Assign a single personality outcome to an answer
+  const handleAnswerPersonalitySelect = (qIndex, aIndex, personalityId) => {
     const questions = [...quizData.questions];
-    if (!questions[qIndex].answers[aIndex].personality_weights) {
-      questions[qIndex].answers[aIndex].personality_weights = {};
-    }
-    questions[qIndex].answers[aIndex].personality_weights[personalityId] = parseInt(weight) || 0;
+    questions[qIndex].answers[aIndex].personality_tag = personalityId;
     setQuizData({ ...quizData, questions });
   };
 
@@ -194,8 +184,8 @@ function CreateQuiz() {
         {
           text: '',
           answers: [
-            { text: '', is_correct: false, personality_weights: {} },
-            { text: '', is_correct: false, personality_weights: {} }
+            { text: '', is_correct: false, personality_tag: '' },
+            { text: '', is_correct: false, personality_tag: '' }
           ]
         }
       ]
@@ -207,7 +197,7 @@ function CreateQuiz() {
     questions[qIndex].answers.push({ 
       text: '', 
       is_correct: false, 
-      personality_weights: {} 
+      personality_tag: '' 
     });
     setQuizData({ ...quizData, questions });
   };
@@ -224,6 +214,7 @@ function CreateQuiz() {
         description: '',
         type: 'personality',
         tags: [],
+        personalities: [], // Ensure personalities array exists after reset
         questions: [
           {
             text: '',
@@ -451,35 +442,23 @@ function CreateQuiz() {
                         <span className="checkmark">Correct Answer</span>
                       </label>
                     ) : (
-                      <div className="personality-weights">
-                        <label className="weights-label">Personality Points:</label>
+                      <div className="personality-assignment">
+                        <label className="weights-label">Assign Personality Outcome:</label>
                         {quizData.personalities.length === 0 ? (
-                          <p className="no-personalities-message">
-                            ⚠️ Add personality outcomes above to set up scoring
-                          </p>
+                          <p className="no-personalities-message">⚠️ Add personality outcomes above first</p>
                         ) : (
-                          <div className="weight-inputs">
-                            {quizData.personalities.map((personality) => (
-                              <div key={personality.id} className="weight-input-group">
-                                <span className="personality-label">
-                                  {personality.emoji} {personality.name || `Outcome ${quizData.personalities.indexOf(personality) + 1}`}:
-                                </span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="5"
-                                  value={answer.personality_weights[personality.id] || 0}
-                                  onChange={(e) => handleWeightChange(qIndex, aIndex, personality.id, e.target.value)}
-                                  className="weight-input"
-                                  placeholder="0"
-                                />
-                                <span className="weight-help">pts</span>
-                              </div>
+                          <select
+                            value={answer.personality_tag || ''}
+                            onChange={(e) => handleAnswerPersonalitySelect(qIndex, aIndex, e.target.value)}
+                            className="personality-select"
+                          >
+                            <option value="">-- None / Neutral --</option>
+                            {quizData.personalities.map(p => (
+                              <option key={p.id} value={p.id}>
+                                {p.emoji} {p.name || 'Unnamed'}
+                              </option>
                             ))}
-                            <div className="weight-help-text">
-                              <small>0 = No influence, 1-5 = Points toward this personality</small>
-                            </div>
-                          </div>
+                          </select>
                         )}
                       </div>
                     )}

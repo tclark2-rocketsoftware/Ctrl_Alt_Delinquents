@@ -1,7 +1,63 @@
 // Display results + personality content
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getQuiz } from '../services/api';
 
 function QuizResult({ result }) {
+  const [mappedName, setMappedName] = useState(null);
+  const [quizPersonalities, setQuizPersonalities] = useState([]);
+
+  // Attempt to map legacy personality id (e.g., personality_123) to its title
+  useEffect(() => {
+    // If backend already provided structured outcome with name, use it
+    if (result?.personality_outcome?.name) {
+      setMappedName(result.personality_outcome.name);
+      return;
+    }
+
+    const raw = result?.personality;
+    if (!raw) return;
+
+    // Only attempt fetch if looks like internal id and no outcome name
+    if (raw.startsWith('personality_')) {
+      (async () => {
+        try {
+          const quiz = await getQuiz(result.quiz_id);
+          if (quiz && Array.isArray(quiz.personalities)) {
+            setQuizPersonalities(quiz.personalities);
+            const def = quiz.personalities.find(p => p.id === raw);
+            if (def && def.name) {
+              setMappedName(def.name);
+            }
+          }
+        } catch (e) {
+          // Silent fail; we'll fall back to raw id
+        }
+      })();
+    } else {
+      // Raw already looks like a human-readable name
+      setMappedName(raw);
+    }
+  }, [result]);
+
+  // Fallback: if we still don't have mappedName but we have an outcome without name, try mapping winning id
+  useEffect(() => {
+    if (!mappedName && result?.personality_outcome && !result.personality_outcome.name) {
+      const winningId = result.personality_outcome.id || result.personality_outcome.winning;
+      if (winningId) {
+        // Attempt mapping from personalities we may already have
+        const def = quizPersonalities.find(p => p.id === winningId);
+        if (def && def.name) {
+          setMappedName(def.name);
+        } else if (typeof winningId === 'string' && winningId.startsWith('personality_')) {
+          // Make a readable fallback by stripping prefix
+            const readable = winningId.replace(/^personality_/, '');
+            setMappedName(`Personality ${readable}`);
+        } else if (winningId) {
+          setMappedName(winningId);
+        }
+      }
+    }
+  }, [mappedName, result, quizPersonalities]);
   const shareResult = () => {
     const shareText = result.score !== null 
       ? `I scored ${result.score} on this quiz!`
@@ -59,7 +115,7 @@ function QuizResult({ result }) {
                       {result.personality_outcome.emoji && (
                         <span className="personality-emoji">{result.personality_outcome.emoji}</span>
                       )}
-                      <h3>{result.personality_outcome.name}</h3>
+                      <h3>{result.personality_outcome.name || mappedName || result.personality}</h3>
                     </div>
                     
                     {result.personality_outcome.description && (
@@ -70,8 +126,8 @@ function QuizResult({ result }) {
                   </div>
                 </div>
               ) : (
-                // Fallback for old personality format
-                <div className="personality-type">{result.personality}</div>
+                // Fallback for old personality format: use mappedName if available
+                <div className="personality-type">{mappedName || result.personality}</div>
               )}
             </div>
             

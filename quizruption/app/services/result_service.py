@@ -208,13 +208,42 @@ def calculate_result(db: Session, submission: schemas.QuizSubmission):
                     quiz_personalities = quiz.personalities
             
             if quiz_personalities:
-                # Use weighted personality calculation
+                # Use weighted personality calculation first
                 personality_outcome = calculate_personality_weighted(answers, quiz_personalities)
                 if personality_outcome:
-                    # Store the personality name for backward compatibility
                     result.personality = personality_outcome['name']
-                    # Store the full outcome data (we'll need to extend the model for this)
                     result.personality_data = json.dumps(personality_outcome)
+                else:
+                    # Fallback to tag-based counting if no weighted outcome produced
+                    personality_tags = [answer.personality_tag for answer in answers if answer.personality_tag]
+                    if personality_tags:
+                        personality_counter = Counter(personality_tags)
+                        winning_id = personality_counter.most_common(1)[0][0]
+                        # Map ID to definition name if available
+                        winning_name = None
+                        for p in quiz_personalities:
+                            pid = p.get('id') if isinstance(p, dict) else getattr(p, 'id', None)
+                            if pid == winning_id:
+                                winning_name = p.get('name') if isinstance(p, dict) else getattr(p, 'name', None)
+                                break
+                        # Set result.personality to human-readable name (fallback to id)
+                        result.personality = winning_name or winning_id
+                        total = sum(personality_counter.values())
+                        percentages = {tag: count / total for tag, count in personality_counter.items() if total > 0}
+                        outcome_payload = {
+                            "id": winning_id,
+                            "name": winning_name or winning_id,
+                            "description": None,
+                            "emoji": None,
+                            "image_url": None,
+                            "winning": winning_id,
+                            "counts": dict(personality_counter),
+                            "percentages": percentages
+                        }
+                        try:
+                            result.personality_data = json.dumps(outcome_payload)
+                        except Exception:
+                            pass
             else:
                 # Fallback to old personality tag system
                 personality_tags = [answer.personality_tag for answer in answers if answer.personality_tag]
@@ -227,25 +256,33 @@ def calculate_result(db: Session, submission: schemas.QuizSubmission):
             personality_tags = [answer.personality_tag for answer in answers if answer.personality_tag]
             if personality_tags:
                 personality_counter = Counter(personality_tags)
-                most_common = personality_counter.most_common(1)[0][0]
-                result.personality = most_common
-                # Store structured outcome data (counts & percentages)
-                total = sum(personality_counter.values())
-                percentages = {tag: count / total for tag, count in personality_counter.items() if total > 0}
-                outcome_payload = {
-                    "winning": most_common,
-                    "counts": dict(personality_counter),
-                    "percentages": percentages
-                }
+                winning_id = personality_counter.most_common(1)[0][0]
+                # Attempt to map to personality name from quiz definitions
+                winning_name = None
+                quiz_personalities = []
                 try:
-                    result.personality_data = json.dumps(outcome_payload)
+                    if hasattr(quiz, 'personalities') and quiz.personalities:
+                        if isinstance(quiz.personalities, str):
+                            quiz_personalities = json.loads(quiz.personalities)
+                        else:
+                            quiz_personalities = quiz.personalities
+                    for p in quiz_personalities:
+                        pid = p.get('id') if isinstance(p, dict) else getattr(p, 'id', None)
+                        if pid == winning_id:
+                            winning_name = p.get('name') if isinstance(p, dict) else getattr(p, 'name', None)
+                            break
                 except Exception:
                     pass
-                # Add structured outcome data for new personality system
+                result.personality = winning_name or winning_id
                 total = sum(personality_counter.values())
                 percentages = {tag: count / total for tag, count in personality_counter.items() if total > 0}
                 outcome_payload = {
-                    "winning": most_common,
+                    "id": winning_id,
+                    "name": winning_name or winning_id,
+                    "description": None,
+                    "emoji": None,
+                    "image_url": None,
+                    "winning": winning_id,
                     "counts": dict(personality_counter),
                     "percentages": percentages
                 }
@@ -283,8 +320,35 @@ def get_result_with_content(db: Session, result_id: int):
     if hasattr(result, 'personality_data') and result.personality_data:
         try:
             parsed = json.loads(result.personality_data)
-            # Normalize keys for schema: expects generic dict
+            # If missing a human-readable name, attempt to map via quiz personalities
+            if (not parsed.get('name')) and parsed.get('id'):
+                quiz = db.query(models.Quiz).filter(models.Quiz.id == result.quiz_id).first()
+                if quiz and getattr(quiz, 'personalities', None):
+                    quiz_personalities = []
+                    try:
+                        if isinstance(quiz.personalities, str):
+                            quiz_personalities = json.loads(quiz.personalities)
+                        else:
+                            quiz_personalities = quiz.personalities
+                        for p in quiz_personalities:
+                            pid = p.get('id') if isinstance(p, dict) else getattr(p, 'id', None)
+                            if pid == parsed.get('id'):
+                                name_val = p.get('name') if isinstance(p, dict) else getattr(p, 'name', None)
+                                if name_val:
+                                    parsed['name'] = name_val
+                                # Also map description/emoji/image_url if absent
+                                for field in ['description','emoji','image_url']:
+                                    if not parsed.get(field) and (
+                                        (isinstance(p, dict) and p.get(field)) or getattr(p, field, None)
+                                    ):
+                                        parsed[field] = p.get(field) if isinstance(p, dict) else getattr(p, field, None)
+                                break
+                    except Exception:
+                        pass
             result_dict["personality_outcome"] = parsed
+            # Ensure top-level personality mirrors readable name
+            if parsed.get('name'):
+                result_dict['personality'] = parsed.get('name')
         except (json.JSONDecodeError, TypeError):
             pass
 

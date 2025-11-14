@@ -42,10 +42,19 @@ class Question(QuestionBase):
 
 
 # Quiz schemas
+class PersonalityDefinition(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    emoji: Optional[str] = None
+    image_url: Optional[str] = None
+
+
 class QuizBase(BaseModel):
     title: str
     description: Optional[str] = None
     type: str  # 'trivia' or 'personality'
+    personalities: Optional[List[PersonalityDefinition]] = None  # Personality outcomes definitions
 
 
 class QuizCreate(QuizBase):
