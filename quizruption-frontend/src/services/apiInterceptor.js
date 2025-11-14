@@ -2,10 +2,15 @@ import axios from 'axios';
 import logger from '../utils/logger';
 
 /**
- * Enhanced API interceptor with secure logging
+ * Enhanced API interceptor with secure logging.
+ * Base URL resolution order:
+ * 1. REACT_APP_API_URL (build-time env)
+ * 2. Relative '/api' (same-origin backend behind reverse proxy)
+ *
+ * Removes hardcoded localhost so production doesn't accidentally call a dev machine.
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = (process.env.REACT_APP_API_URL || '/api').replace(/\/+$/, '');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
