@@ -229,6 +229,30 @@ def calculate_result(db: Session, submission: schemas.QuizSubmission):
                 personality_counter = Counter(personality_tags)
                 most_common = personality_counter.most_common(1)[0][0]
                 result.personality = most_common
+                # Store structured outcome data (counts & percentages)
+                total = sum(personality_counter.values())
+                percentages = {tag: count / total for tag, count in personality_counter.items() if total > 0}
+                outcome_payload = {
+                    "winning": most_common,
+                    "counts": dict(personality_counter),
+                    "percentages": percentages
+                }
+                try:
+                    result.personality_data = json.dumps(outcome_payload)
+                except Exception:
+                    pass
+                # Add structured outcome data for new personality system
+                total = sum(personality_counter.values())
+                percentages = {tag: count / total for tag, count in personality_counter.items() if total > 0}
+                outcome_payload = {
+                    "winning": most_common,
+                    "counts": dict(personality_counter),
+                    "percentages": percentages
+                }
+                try:
+                    result.personality_data = json.dumps(outcome_payload)
+                except Exception:
+                    pass
     
     db.add(result)
     db.commit()
@@ -258,7 +282,9 @@ def get_result_with_content(db: Session, result_id: int):
     # Add new personality outcome data if available
     if hasattr(result, 'personality_data') and result.personality_data:
         try:
-            result_dict["personality_outcome"] = json.loads(result.personality_data)
+            parsed = json.loads(result.personality_data)
+            # Normalize keys for schema: expects generic dict
+            result_dict["personality_outcome"] = parsed
         except (json.JSONDecodeError, TypeError):
             pass
 
