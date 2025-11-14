@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base
+from app.config import settings
 from app.routes import quizzes, answers, results, auth, chat, uploads
 from app.routes import jokes
 import logging

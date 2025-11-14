@@ -13,20 +13,13 @@ from typing import List
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
-<<<<<<< HEAD
 # Use centralized settings for security parameters
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.jwt_algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
-=======
 # Initialize logger
 logger = logging.getLogger(__name__)
 
-# JWT Secret key (in production, this should be in environment variables)
-SECRET_KEY = "your-secret-key-here"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
->>>>>>> origin/jokes
 
 
 class UserCreate(BaseModel):
