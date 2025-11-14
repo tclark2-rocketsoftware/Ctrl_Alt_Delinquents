@@ -24,7 +24,9 @@ if not exist ".env" (
 
 echo ===============================================
 echo Frontend server starting...
-echo App will be available at: http://localhost:3000
+if "%HOST%"=="" set HOST=localhost
+if "%PORT%"=="" set PORT=3000
+echo App will be available at: http://%HOST%:%PORT%
 echo ===============================================
 echo.
 

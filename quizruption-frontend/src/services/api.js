@@ -1,7 +1,17 @@
 // Axios setup for API calls
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// Build API base URL with flexible host/port/path fallback.
+// Priority order:
+// 1. REACT_APP_API_URL (complete URL)
+// 2. REACT_APP_API_HOST + REACT_APP_API_PORT (+ optional REACT_APP_API_PATH, default '/api')
+// 3. localhost fallback
+const host = process.env.REACT_APP_API_HOST;
+const port = process.env.REACT_APP_API_PORT;
+const path = process.env.REACT_APP_API_PATH || '/api';
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  (host && port ? `http://${host}:${port}${path}` : 'http://localhost:8000/api');
 
 const api = axios.create({
   baseURL: API_BASE_URL,

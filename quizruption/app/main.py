@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from app.database import engine, Base
 from app.routes import quizzes, answers, results, auth, chat
+from app.config import settings
 from app.routes import jokes
 import logging
 from logging.handlers import RotatingFileHandler
@@ -32,9 +33,10 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Quizruption API", description="Interactive Quiz Web App API", version="1.0.0")
 
 # CORS middleware for frontend access
+cors_origins = settings.cors_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Update with specific origins in production
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

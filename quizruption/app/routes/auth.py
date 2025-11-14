@@ -3,18 +3,19 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.database import get_db
+from app.config import settings
 from app.models import User, Quiz, Result, JokeSuggestion
 from app import schemas
-import jwt
+from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import List
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
-# JWT Secret key (in production, this should be in environment variables)
-SECRET_KEY = "your-secret-key-here"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# Use centralized settings for security parameters
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.jwt_algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
 class UserCreate(BaseModel):

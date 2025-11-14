@@ -32,15 +32,17 @@ echo.
 echo.
 echo ===============================================
 echo Backend server starting...
-echo API will be available at: http://localhost:8000
-echo API Docs: http://localhost:8000/docs
+if "%BACKEND_HOST%"=="" set BACKEND_HOST=0.0.0.0
+if "%BACKEND_PORT%"=="" set BACKEND_PORT=8000
+echo API will be available at: http://%BACKEND_HOST%:%BACKEND_PORT%
+echo API Docs: http://%BACKEND_HOST%:%BACKEND_PORT%/docs
 echo ===============================================
 echo.
 
 REM Start the FastAPI server
 if exist "venv\Scripts\uvicorn.exe" (
-    rem Start uvicorn and keep terminal attached; remove pause for non-interactive use
-    venv\Scripts\uvicorn.exe app.main:app --reload
+    rem Start uvicorn with configurable host/port
+    venv\Scripts\uvicorn.exe app.main:app --host %BACKEND_HOST% --port %BACKEND_PORT% --reload
 ) else (
     echo ERROR: uvicorn not found! Dependencies may not have installed correctly.
     echo Please check the error messages above.

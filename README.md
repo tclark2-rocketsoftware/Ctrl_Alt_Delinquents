@@ -35,6 +35,59 @@ Ctrl_Alt_Delinquents/
    pip install -r requirements.txt
    ```
 
+   ### Backend Environment Variables
+
+   The FastAPI backend reads a `.env` file (python-dotenv) located in `quizruption/`. Copy `quizruption/.env.example` to `quizruption/.env` and adjust:
+
+   | Variable | Purpose | Default |
+   |----------|---------|---------|
+   | BACKEND_HOST | Interface uvicorn binds to | 0.0.0.0 |
+   | BACKEND_PORT | Port uvicorn listens on | 8000 |
+   | SECRET_KEY | JWT signing key (change in production) | dev-insecure-change-me |
+   | JWT_ALGORITHM | JWT algorithm | HS256 |
+   | ACCESS_TOKEN_EXPIRE_MINUTES | Token lifetime | 30 |
+   | CORS_ORIGINS | Comma list or * | * |
+   | SQLITE_URL | Override DB URL | sqlite:///./quizruption.db |
+   | OPENAI_API_KEY | Enables AI joke generation | (unset) |
+
+   Example (PowerShell, one-off without editing file):
+   ```powershell
+   $env:BACKEND_HOST="10.0.0.15"
+   $env:BACKEND_PORT="8081"
+   uvicorn app.main:app --host $env:BACKEND_HOST --port $env:BACKEND_PORT
+   ```
+
+   ### Frontend Environment Variables
+
+   Create or edit `quizruption-frontend/.env` using either a direct URL or host/port/path composition (Create React App injects at build time):
+
+   Option A (single URL):
+   ```
+   REACT_APP_API_URL=http://10.0.0.15:8081/api
+   ```
+
+   Option B (components):
+   ```
+   REACT_APP_API_HOST=10.0.0.15
+   REACT_APP_API_PORT=8081
+   REACT_APP_API_PATH=/api
+   ```
+
+   If both are set, `REACT_APP_API_URL` takes priority. After changes, restart `npm start` or rebuild.
+
+   ### Running With Scripts
+
+   Backend:
+   ```powershell
+   ./run-backend.bat   # Uses .env automatically (python-dotenv) and BACKEND_HOST/BACKEND_PORT if set
+   ```
+
+   Frontend:
+   ```powershell
+   ./run-frontend.bat  # Uses .env variables for API base URL
+   ```
+
+
 ## Usage
 
 Run the main application:
