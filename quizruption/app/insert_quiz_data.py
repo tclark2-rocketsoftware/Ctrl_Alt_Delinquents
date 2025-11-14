@@ -1,8 +1,15 @@
+import os
 from app.database import SessionLocal
 from app.models import Quiz, Question, Answer
 from app.tests.test_quiz_data import quiz_data
 
 def insert_quizzes():
+    # Only run if SEED_QUIZZES environment variable is set to "1"
+    print("Seeding quizzes into the database...")
+    if os.getenv("SEED_QUIZZES") != "1":
+        print("Seeding skipped: Set SEED_QUIZZES=1 to populate the database.")
+        return
+    
     session = SessionLocal()
     try:
         for quiz in quiz_data:
@@ -38,3 +45,6 @@ def insert_quizzes():
         print("Error:", e)
     finally:
         session.close()
+
+if __name__ == "__main__":
+    insert_quizzes()
