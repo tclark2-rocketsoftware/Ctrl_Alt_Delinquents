@@ -44,6 +44,14 @@ def create_quiz(db: Session, quiz: schemas.QuizCreate):
     
     db.commit()
     db.refresh(db_quiz)
+    
+    # Parse personalities JSON string back to list for response
+    if getattr(db_quiz, 'personalities', None) and isinstance(db_quiz.personalities, str):
+        try:
+            db_quiz.personalities = json.loads(db_quiz.personalities)
+        except Exception:
+            db_quiz.personalities = None
+    
     return db_quiz
 
 
@@ -123,6 +131,14 @@ def update_quiz(db: Session, quiz_id: int, quiz: schemas.QuizCreate):
     
     db.commit()
     db.refresh(db_quiz)
+    
+    # Parse personalities JSON string back to list for response
+    if getattr(db_quiz, 'personalities', None) and isinstance(db_quiz.personalities, str):
+        try:
+            db_quiz.personalities = json.loads(db_quiz.personalities)
+        except Exception:
+            db_quiz.personalities = None
+    
     return db_quiz
 
 
