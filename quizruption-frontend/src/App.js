@@ -1,5 +1,5 @@
 // Main app component
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
@@ -20,6 +20,11 @@ import JokeSuggestions from './pages/JokeSuggestions';
 import CreateQuiz from './components/CreateQuiz';
 import EditQuiz from './components/EditQuiz';
 import TurtleChatBot from './components/TurtleChatBot';
+import ErrorBoundary from './components/ErrorBoundary';
+import LoggingDashboard from './components/LoggingDashboard';
+import AdminLogin from './components/AdminLogin';
+import logger from './utils/logger';
+import { isAdminAuthenticated } from './utils/adminAuth';
 import './styles/main.css';
 
 // Protected Route component
@@ -44,9 +49,45 @@ function PublicRoute({ children }) {
   return !isAuthenticated ? children : <Navigate to="/dashboard" />;
 }
 
+// Admin Route component (redirects to admin login if not authenticated as admin)
+function AdminRoute({ children }) {
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [checking, setChecking] = React.useState(true);
+
+  React.useEffect(() => {
+    const checkAdminAuth = () => {
+      const adminAuth = isAdminAuthenticated();
+      setIsAdmin(adminAuth);
+      setChecking(false);
+    };
+    checkAdminAuth();
+  }, []);
+
+  if (checking) {
+    return <div className="loading">Checking admin access...</div>;
+  }
+
+  return isAdmin ? children : <Navigate to="/admin/login" />;
+}
+
 function AppContent() {
-  const { login, logout } = useAuth();
+  const { login, logout, user } = useAuth();
   const chatBotRef = useRef(null);
+
+  // Log app initialization
+  useEffect(() => {
+    logger.info('Application initialized', {
+      environment: process.env.NODE_ENV,
+      userAuthenticated: !!user
+    });
+  }, []);
+
+  // Log authentication changes
+  useEffect(() => {
+    if (user) {
+      logger.logUserAction('User Authenticated', { userId: user.id });
+    }
+  }, [user]);
 
   const handleOpenChat = () => {
     if (chatBotRef.current) {
@@ -106,6 +147,12 @@ function AppContent() {
             <JokeSuggestions />
           </ProtectedRoute>
         } />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/logs" element={
+          <AdminRoute>
+            <LoggingDashboard />
+          </AdminRoute>
+        } />
         <Route path="/quiz/:id" element={<QuizPage />} />
         <Route path="/result/:id" element={<ResultPage />} />
         <Route path="/daily-joke" element={<DailyJoke onOpenChat={handleOpenChat} />} />
@@ -118,11 +165,13 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

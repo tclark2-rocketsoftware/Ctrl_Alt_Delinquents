@@ -37,10 +37,13 @@ echo API Docs: http://localhost:8000/docs
 echo ===============================================
 echo.
 
-REM Start the FastAPI server
+REM Start the FastAPI server (explicit host/port for stability)
+set "API_HOST=127.0.0.1"
+set "API_PORT=8000"
+echo Launching Uvicorn on %API_HOST%:%API_PORT% ...
 if exist "venv\Scripts\uvicorn.exe" (
-    rem Start uvicorn and keep terminal attached; remove pause for non-interactive use
-    venv\Scripts\uvicorn.exe app.main:app --reload
+    rem Start uvicorn with explicit host and port; remove --reload for production
+    venv\Scripts\uvicorn.exe app.main:app --host %API_HOST% --port %API_PORT% --reload
 ) else (
     echo ERROR: uvicorn not found! Dependencies may not have installed correctly.
     echo Please check the error messages above.

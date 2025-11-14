@@ -1,14 +1,8 @@
 // Axios setup for API calls
-import axios from 'axios';
+import apiInterceptor from './apiInterceptor';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Use the enhanced API instance with logging
+const api = apiInterceptor;
 
 // Quiz endpoints
 export const getQuizzes = async (type = null) => {
