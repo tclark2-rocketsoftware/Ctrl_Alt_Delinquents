@@ -1,16 +1,26 @@
 # Business logic for quizzes
 from sqlalchemy.orm import Session, joinedload
 from app import models, schemas
+import json
 from typing import List, Optional
 
 
 def create_quiz(db: Session, quiz: schemas.QuizCreate):
     """Create a new quiz with questions and answers"""
+    personalities_payload = None
+    if getattr(quiz, 'personalities', None):
+        try:
+            personalities_payload = [
+                p.dict() if hasattr(p, 'dict') else p for p in quiz.personalities
+            ]
+        except Exception:
+            personalities_payload = None
     db_quiz = models.Quiz(
         title=quiz.title,
         description=quiz.description,
         type=quiz.type,
-        created_by=quiz.created_by
+        created_by=quiz.created_by,
+        personalities=json.dumps(personalities_payload) if personalities_payload else None
     )
     db.add(db_quiz)
     db.flush()
@@ -45,19 +55,30 @@ def get_quizzes(
 ) -> List[models.Quiz]:
     """Get all quizzes with optional filtering by type"""
     query = db.query(models.Quiz).options(joinedload(models.Quiz.creator))
-    
     if quiz_type:
         query = query.filter(models.Quiz.type == quiz_type)
-    
-    return query.offset(skip).limit(limit).all()
+    quizzes = query.offset(skip).limit(limit).all()
+    for q in quizzes:
+        if getattr(q, 'personalities', None) and isinstance(q.personalities, str):
+            try:
+                q.personalities = json.loads(q.personalities)
+            except Exception:
+                q.personalities = None
+    return quizzes
 
 
 def get_quiz(db: Session, quiz_id: int):
     """Get a specific quiz by ID with creator information"""
-    return db.query(models.Quiz)\
+    q = db.query(models.Quiz)\
         .options(joinedload(models.Quiz.creator))\
         .filter(models.Quiz.id == quiz_id)\
         .first()
+    if q and getattr(q, 'personalities', None) and isinstance(q.personalities, str):
+        try:
+            q.personalities = json.loads(q.personalities)
+        except Exception:
+            q.personalities = None
+    return q
 
 
 def update_quiz(db: Session, quiz_id: int, quiz: schemas.QuizCreate):
@@ -65,11 +86,19 @@ def update_quiz(db: Session, quiz_id: int, quiz: schemas.QuizCreate):
     db_quiz = get_quiz(db, quiz_id)
     if not db_quiz:
         return None
-    
-    # Update quiz fields
     db_quiz.title = quiz.title
     db_quiz.description = quiz.description
     db_quiz.type = quiz.type
+    if getattr(quiz, 'personalities', None):
+        try:
+            personalities_payload = [
+                p.dict() if hasattr(p, 'dict') else p for p in quiz.personalities
+            ]
+            db_quiz.personalities = json.dumps(personalities_payload) if personalities_payload else None
+        except Exception:
+            db_quiz.personalities = None
+    else:
+        db_quiz.personalities = None
     
     # Delete existing questions and answers
     db.query(models.Question).filter(models.Question.quiz_id == quiz_id).delete()
