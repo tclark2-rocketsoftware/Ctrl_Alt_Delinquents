@@ -143,3 +143,4 @@ class PersonalityContentResponse(BaseModel):
 
 class DetailedResultResponse(ResultResponse):
     personality_content: Optional[PersonalityContentResponse] = None
+    personality_outcome: Optional[dict] = None  # Contains structured personality data (winning, counts, percentages)
