@@ -114,22 +114,7 @@ function QuizList({ filter, limit, showTitle = true, type, title }) {
                 <Link to={`/quiz/${quiz.id}`} className="btn-primary">
                   🚀 Start {quiz.type === 'trivia' ? 'Trivia' : 'Quiz'}
                 </Link>
-                <Link to={`/quiz/${quiz.id}/details`} className="btn-secondary">
-                  📖 Details
-                </Link>
-                {user && quiz.created_by === user.id && (
-                  <div className="creator-actions">
-                    <Link to={`/edit/${quiz.id}`} className="btn-edit">
-                      ✏️ Edit
-                    </Link>
-                    <button 
-                      onClick={() => handleDelete(quiz.id, quiz.title)}
-                      className="btn-delete"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
-                )}
+                {/* Edit/Delete removed from list view; now only available within user profile */}
               </div>
             </div>
           ))}

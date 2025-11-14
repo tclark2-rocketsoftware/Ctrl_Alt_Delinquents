@@ -72,6 +72,7 @@ class Quiz(Base):
     title = Column(Text, nullable=False)
     description = Column(Text)
     type = Column(String, nullable=False)  # 'trivia' or 'personality'
+    personalities = Column(Text)  # JSON string containing personality definitions
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, server_default=func.now())
     
@@ -98,7 +99,8 @@ class Answer(Base):
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
     text = Column(Text, nullable=False)
     is_correct = Column(Boolean, default=False)
-    personality_tag = Column(Text)
+    personality_tag = Column(Text)  # Keep for backward compatibility
+    personality_weights = Column(Text)  # JSON string containing personality weights
     
     question = relationship("Question", back_populates="answers")
 
@@ -111,6 +113,7 @@ class Result(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     score = Column(Integer)
     personality = Column(Text)
+    personality_data = Column(Text)  # JSON string containing full personality outcome
     created_at = Column(DateTime, server_default=func.now())
     
     user = relationship("User", back_populates="results")

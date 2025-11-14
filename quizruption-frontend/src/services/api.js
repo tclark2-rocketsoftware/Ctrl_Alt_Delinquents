@@ -1,24 +1,8 @@
 // Axios setup for API calls
-import axios from 'axios';
+import apiInterceptor from './apiInterceptor';
 
-// Build API base URL with flexible host/port/path fallback.
-// Priority order:
-// 1. REACT_APP_API_URL (complete URL)
-// 2. REACT_APP_API_HOST + REACT_APP_API_PORT (+ optional REACT_APP_API_PATH, default '/api')
-// 3. localhost fallback
-const host = process.env.REACT_APP_API_HOST;
-const port = process.env.REACT_APP_API_PORT;
-const path = process.env.REACT_APP_API_PATH || '/api';
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  (host && port ? `http://${host}:${port}${path}` : 'http://localhost:8000/api');
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Use the enhanced API instance with logging
+const api = apiInterceptor;
 
 // Quiz endpoints
 export const getQuizzes = async (type = null) => {
@@ -77,11 +61,29 @@ export const getCurrentUser = async (token) => {
 
 // Profile endpoints
 export const updateUserProfile = async (profileData) => {
-  const token = localStorage.getItem('authToken');
-  const response = await api.put('/auth/profile', profileData, {
-    params: { token }
-  });
-  return response.data;
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    console.log('Updating profile with data:', profileData);
+    console.log('Using token:', token);
+    
+    const response = await api.put('/auth/profile', profileData, {
+      params: { token }
+    });
+    
+    console.log('Profile update response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Profile update error:', error);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+      console.error('Error status:', error.response.status);
+    }
+    throw error;
+  }
 };
 
 export const getUserProfile = async (userId) => {

@@ -6,16 +6,27 @@ from app.database import get_db
 from app.config import settings
 from app.models import User, Quiz, Result, JokeSuggestion
 from app import schemas
-from jose import jwt, JWTError
+import jwt
+import logging
 from datetime import datetime, timedelta
 from typing import List
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
+<<<<<<< HEAD
 # Use centralized settings for security parameters
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.jwt_algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
+=======
+# Initialize logger
+logger = logging.getLogger(__name__)
+
+# JWT Secret key (in production, this should be in environment variables)
+SECRET_KEY = "your-secret-key-here"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+>>>>>>> origin/jokes
 
 
 class UserCreate(BaseModel):
@@ -185,8 +196,8 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     # Get quizzes created by user
     quizzes_created = db.query(Quiz).filter(Quiz.created_by == user_id).all()
     
-    # Get quizzes taken by user (results)
-    results = db.query(Result).filter(Result.user_id == user_id).order_by(Result.created_at.desc()).all()
+    # Get quizzes taken by user (results) - include quiz information
+    results = db.query(Result).join(Quiz, Result.quiz_id == Quiz.id).filter(Result.user_id == user_id).order_by(Result.created_at.desc()).all()
     
     # Get personality results (separate from trivia)
     personality_results = [r for r in results if r.personality]
@@ -228,7 +239,9 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
             {
                 "id": r.id,
                 "quiz_id": r.quiz_id,
+                "quiz_title": r.quiz.title if r.quiz else "Unknown Quiz",
                 "personality": r.personality,
+                "personality_data": r.personality_data,  # Include full personality outcome data
                 "created_at": r.created_at.isoformat() if r.created_at else None
             } for r in personality_results
         ],
@@ -236,7 +249,9 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
             {
                 "id": r.id,
                 "quiz_id": r.quiz_id,
+                "quiz_title": r.quiz.title if r.quiz else "Unknown Quiz",
                 "score": r.score,
+                "total_questions": r.quiz.questions.count() if r.quiz else 0,
                 "created_at": r.created_at.isoformat() if r.created_at else None
             } for r in trivia_results
         ],

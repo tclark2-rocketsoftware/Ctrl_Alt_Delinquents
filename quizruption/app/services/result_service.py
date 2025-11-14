@@ -3,6 +3,11 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from typing import List, Dict, Any
 from collections import Counter
+import json
+import logging
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 
 def calculate_score(questions: List[Any], user_answers: List[int]) -> int:
@@ -20,6 +25,69 @@ def calculate_score(questions: List[Any], user_answers: List[int]) -> int:
     # Count how many user answers are correct
     score = sum(1 for answer_id in user_answers if answer_id in correct_answer_ids)
     return score
+
+
+def calculate_personality_weighted(user_answers_data: List[Any], quiz_personalities: List[Any]) -> Dict[str, Any]:
+    """Calculate personality based on weighted scoring system
+    
+    Args:
+        user_answers_data: List of answer objects with personality_weights
+        quiz_personalities: List of personality outcome definitions
+    
+    Returns:
+        Dict containing winning personality information
+    """
+    if not user_answers_data or not quiz_personalities:
+        return None
+    
+    # Initialize personality scores
+    personality_scores = {}
+    for personality in quiz_personalities:
+        personality_id = personality.get('id') if isinstance(personality, dict) else getattr(personality, 'id', None)
+        if personality_id:
+            personality_scores[personality_id] = 0
+    
+    # Calculate weighted scores
+    for answer_data in user_answers_data:
+        try:
+            # Get personality weights from answer
+            weights = None
+            if hasattr(answer_data, 'personality_weights') and answer_data.personality_weights:
+                if isinstance(answer_data.personality_weights, str):
+                    weights = json.loads(answer_data.personality_weights)
+                else:
+                    weights = answer_data.personality_weights
+            elif isinstance(answer_data, dict):
+                weights = answer_data.get('personality_weights', {})
+            
+            if weights and isinstance(weights, dict):
+                for personality_id, weight in weights.items():
+                    if personality_id in personality_scores and isinstance(weight, (int, float)):
+                        personality_scores[personality_id] += weight
+        except (AttributeError, TypeError, json.JSONDecodeError):
+            continue
+    
+    # Find personality with highest score
+    if not personality_scores or max(personality_scores.values()) == 0:
+        return None
+    
+    winning_personality_id = max(personality_scores, key=personality_scores.get)
+    
+    # Find the full personality data
+    for personality in quiz_personalities:
+        personality_id = personality.get('id') if isinstance(personality, dict) else getattr(personality, 'id', None)
+        if personality_id == winning_personality_id:
+            return {
+                'id': personality_id,
+                'name': personality.get('name') if isinstance(personality, dict) else getattr(personality, 'name', ''),
+                'description': personality.get('description') if isinstance(personality, dict) else getattr(personality, 'description', ''),
+                'emoji': personality.get('emoji') if isinstance(personality, dict) else getattr(personality, 'emoji', ''),
+                'image_url': personality.get('image_url') if isinstance(personality, dict) else getattr(personality, 'image_url', ''),
+                'score': personality_scores[winning_personality_id],
+                'all_scores': personality_scores
+            }
+    
+    return None
 
 
 def calculate_personality(user_answers_data: List[Any]) -> str:
@@ -128,13 +196,63 @@ def calculate_result(db: Session, submission: schemas.QuizSubmission):
         score = sum(1 for answer in answers if answer.is_correct)
         result.score = score
     else:
-        # Calculate personality for personality quiz
-        personality_tags = [answer.personality_tag for answer in answers if answer.personality_tag]
-        if personality_tags:
-            # Get most common personality tag
-            personality_counter = Counter(personality_tags)
-            most_common = personality_counter.most_common(1)[0][0]
-            result.personality = most_common
+        # Calculate personality for personality quiz using weighted scoring
+        try:
+            # Parse quiz personalities from the quiz data
+            import json
+            quiz_personalities = []
+            if hasattr(quiz, 'personalities') and quiz.personalities:
+                if isinstance(quiz.personalities, str):
+                    quiz_personalities = json.loads(quiz.personalities)
+                else:
+                    quiz_personalities = quiz.personalities
+            
+            if quiz_personalities:
+                # Use weighted personality calculation
+                personality_outcome = calculate_personality_weighted(answers, quiz_personalities)
+                if personality_outcome:
+                    # Store the personality name for backward compatibility
+                    result.personality = personality_outcome['name']
+                    # Store the full outcome data (we'll need to extend the model for this)
+                    result.personality_data = json.dumps(personality_outcome)
+            else:
+                # Fallback to old personality tag system
+                personality_tags = [answer.personality_tag for answer in answers if answer.personality_tag]
+                if personality_tags:
+                    personality_counter = Counter(personality_tags)
+                    most_common = personality_counter.most_common(1)[0][0]
+                    result.personality = most_common
+        except Exception as e:
+            # Fallback to old system if there's any error
+            personality_tags = [answer.personality_tag for answer in answers if answer.personality_tag]
+            if personality_tags:
+                personality_counter = Counter(personality_tags)
+                most_common = personality_counter.most_common(1)[0][0]
+                result.personality = most_common
+                # Store structured outcome data (counts & percentages)
+                total = sum(personality_counter.values())
+                percentages = {tag: count / total for tag, count in personality_counter.items() if total > 0}
+                outcome_payload = {
+                    "winning": most_common,
+                    "counts": dict(personality_counter),
+                    "percentages": percentages
+                }
+                try:
+                    result.personality_data = json.dumps(outcome_payload)
+                except Exception:
+                    pass
+                # Add structured outcome data for new personality system
+                total = sum(personality_counter.values())
+                percentages = {tag: count / total for tag, count in personality_counter.items() if total > 0}
+                outcome_payload = {
+                    "winning": most_common,
+                    "counts": dict(personality_counter),
+                    "percentages": percentages
+                }
+                try:
+                    result.personality_data = json.dumps(outcome_payload)
+                except Exception:
+                    pass
     
     db.add(result)
     db.commit()
@@ -149,7 +267,7 @@ def get_result_with_content(db: Session, result_id: int):
     result = db.query(models.Result).filter(models.Result.id == result_id).first()
     if not result:
         return None
-    
+
     result_dict = {
         "id": result.id,
         "quiz_id": result.quiz_id,
@@ -157,9 +275,20 @@ def get_result_with_content(db: Session, result_id: int):
         "score": result.score,
         "personality": result.personality,
         "created_at": result.created_at,
-        "personality_content": None
+        "personality_content": None,
+        "personality_outcome": None
     }
-    
+
+    # Add new personality outcome data if available
+    if hasattr(result, 'personality_data') and result.personality_data:
+        try:
+            parsed = json.loads(result.personality_data)
+            # Normalize keys for schema: expects generic dict
+            result_dict["personality_outcome"] = parsed
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    # Keep old personality content for backward compatibility
     if result.personality:
         content = db.query(models.PersonalityContent).filter(
             models.PersonalityContent.personality == result.personality
@@ -172,7 +301,7 @@ def get_result_with_content(db: Session, result_id: int):
                 "gif_url": content.gif_url,
                 "joke": content.joke
             }
-    
+
     return result_dict
 
 

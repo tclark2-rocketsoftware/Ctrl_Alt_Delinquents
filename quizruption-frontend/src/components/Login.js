@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-// Use centralized API service instead of hardcoded localhost URL
-import { login as loginRequest } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -10,6 +8,7 @@ function Login({ onLogin }) {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -24,9 +23,26 @@ function Login({ onLogin }) {
     setError('');
 
     try {
-      const data = await loginRequest(formData);
-      localStorage.setItem('authToken', data.access_token);
-      onLogin(data.user);
+      const response = await fetch('http://localhost:8000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Store the access token
+        localStorage.setItem('authToken', data.access_token);
+        // Pass the user object to onLogin (which calls login)
+        onLogin(data.user);
+        // Navigate to home page to show welcome banner
+        navigate('/');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || errorData.message || 'Login failed');
+      }
     } catch (err) {
       // Axios error handling
       if (err.response) {

@@ -8,12 +8,13 @@ function CreateQuiz() {
     description: '',
     type: 'personality',
     tags: [], // Add tags array
+    personalities: [], // New: Multiple personality outcomes
     questions: [
       {
         text: '',
         answers: [
-          { text: '', is_correct: false, personality_tag: '' },
-          { text: '', is_correct: false, personality_tag: '' }
+          { text: '', is_correct: false, personality_weights: {} },
+          { text: '', is_correct: false, personality_weights: {} }
         ]
       }
     ]
@@ -59,6 +60,104 @@ function CreateQuiz() {
     setQuizData({ ...quizData, tags });
   };
 
+  // Personality management functions
+  const addPersonality = () => {
+    if (quizData.personalities.length >= 8) {
+      setMessage('Maximum of 8 personality outcomes allowed.');
+      return;
+    }
+    
+    const newPersonality = {
+      id: `personality_${Date.now()}`,
+      name: '',
+      description: '',
+      emoji: '🌟',
+      image_url: ''
+    };
+    
+    setQuizData({
+      ...quizData,
+      personalities: [...quizData.personalities, newPersonality]
+    });
+  };
+
+  const updatePersonality = (index, field, value) => {
+    const personalities = [...quizData.personalities];
+    personalities[index][field] = value;
+    setQuizData({ ...quizData, personalities });
+  };
+
+  const removePersonality = (index) => {
+    const personalities = quizData.personalities.filter((_, i) => i !== index);
+    
+    // Clean up weights in all answers
+    const questions = quizData.questions.map(question => ({
+      ...question,
+      answers: question.answers.map(answer => {
+        const newWeights = { ...answer.personality_weights };
+        delete newWeights[quizData.personalities[index].id];
+        return { ...answer, personality_weights: newWeights };
+      })
+    }));
+    
+    setQuizData({ 
+      ...quizData, 
+      personalities,
+      questions
+    });
+  };
+
+  // Handle personality image upload
+  const handlePersonalityImageUpload = async (personalityIndex, event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setMessage('Please select a valid image file.');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage('Image must be less than 5MB.');
+      return;
+    }
+
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      // Get auth token
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setMessage('Authentication required for image upload.');
+        return;
+      }
+
+      // Upload image
+      const response = await fetch(`http://localhost:8000/api/upload/personality-image?token=${encodeURIComponent(token)}`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      
+      // Update personality with new image URL
+      updatePersonality(personalityIndex, 'image_url', data.image_url);
+      setMessage('Image uploaded successfully!');
+      
+    } catch (error) {
+      console.error('Error uploading personality image:', error);
+      setMessage('Error uploading image. Please try again.');
+    }
+  };
+
   const handleQuestionChange = (qIndex, value) => {
     const questions = [...quizData.questions];
     questions[qIndex].text = value;
@@ -68,6 +167,16 @@ function CreateQuiz() {
   const handleAnswerChange = (qIndex, aIndex, field, value) => {
     const questions = [...quizData.questions];
     questions[qIndex].answers[aIndex][field] = value;
+    setQuizData({ ...quizData, questions });
+  };
+
+  // Handle personality weight changes
+  const handleWeightChange = (qIndex, aIndex, personalityId, weight) => {
+    const questions = [...quizData.questions];
+    if (!questions[qIndex].answers[aIndex].personality_weights) {
+      questions[qIndex].answers[aIndex].personality_weights = {};
+    }
+    questions[qIndex].answers[aIndex].personality_weights[personalityId] = parseInt(weight) || 0;
     setQuizData({ ...quizData, questions });
   };
 
@@ -85,8 +194,8 @@ function CreateQuiz() {
         {
           text: '',
           answers: [
-            { text: '', is_correct: false, personality_tag: '' },
-            { text: '', is_correct: false, personality_tag: '' }
+            { text: '', is_correct: false, personality_weights: {} },
+            { text: '', is_correct: false, personality_weights: {} }
           ]
         }
       ]
@@ -95,7 +204,11 @@ function CreateQuiz() {
 
   const addAnswer = (qIndex) => {
     const questions = [...quizData.questions];
-    questions[qIndex].answers.push({ text: '', is_correct: false, personality_tag: '' });
+    questions[qIndex].answers.push({ 
+      text: '', 
+      is_correct: false, 
+      personality_weights: {} 
+    });
     setQuizData({ ...quizData, questions });
   };
 
@@ -194,6 +307,114 @@ function CreateQuiz() {
           </div>
         </div>
 
+        {quizData.type === 'personality' && (
+          <div className="personalities-section">
+            <div className="section-header">
+              <h3>Personality Outcomes</h3>
+              <p className="help-text">Define the possible personalities users can get. You need at least 2 outcomes.</p>
+            </div>
+            
+            {quizData.personalities.map((personality, index) => (
+              <div key={personality.id} className="personality-block">
+                <div className="personality-header">
+                  <h4>Outcome {index + 1}</h4>
+                  <button 
+                    type="button" 
+                    onClick={() => removePersonality(index)}
+                    className="btn-remove"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="personality-form">
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Emoji</label>
+                      <input
+                        type="text"
+                        maxLength="2"
+                        value={personality.emoji}
+                        onChange={(e) => updatePersonality(index, 'emoji', e.target.value)}
+                        placeholder="🌟"
+                        className="emoji-input"
+                      />
+                    </div>
+                    <div className="form-group flex-1">
+                      <label>Personality Name</label>
+                      <input
+                        type="text"
+                        value={personality.name}
+                        onChange={(e) => updatePersonality(index, 'name', e.target.value)}
+                        placeholder="e.g., The Creative Visionary, The Logical Thinker"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Description</label>
+                    <textarea
+                      value={personality.description}
+                      onChange={(e) => updatePersonality(index, 'description', e.target.value)}
+                      placeholder="Describe this personality type and what it means..."
+                      rows="3"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Personality Image</label>
+                    <div className="image-upload-section">
+                      {personality.image_url ? (
+                        <div className="personality-image-preview">
+                          <img 
+                            src={personality.image_url.startsWith('http') 
+                              ? personality.image_url 
+                              : `http://localhost:8000${personality.image_url}`
+                            } 
+                            alt={personality.name || 'Personality'} 
+                            className="personality-preview-img"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => updatePersonality(index, 'image_url', '')}
+                            className="btn-remove-image"
+                          >
+                            🗑️ Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="image-upload-placeholder">
+                          <label htmlFor={`personality-image-${personality.id}`} className="upload-btn">
+                            📸 Upload Image
+                          </label>
+                          <input
+                            id={`personality-image-${personality.id}`}
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                            onChange={(e) => handlePersonalityImageUpload(index, e)}
+                            style={{ display: 'none' }}
+                          />
+                          <p className="upload-hint">Add an image that represents this personality (optional)</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            <button 
+              type="button" 
+              onClick={addPersonality}
+              className={quizData.personalities.length >= 8 ? "btn-disabled" : "btn-secondary"}
+              disabled={quizData.personalities.length >= 8}
+            >
+              {quizData.personalities.length >= 8 ? "Maximum Outcomes Reached (8/8)" : `Add Personality Outcome (${quizData.personalities.length}/8)`}
+            </button>
+          </div>
+        )}
+
         <div className="questions-section">
           <h3>Questions</h3>
           {quizData.questions.map((question, qIndex) => (
@@ -230,13 +451,37 @@ function CreateQuiz() {
                         <span className="checkmark">Correct Answer</span>
                       </label>
                     ) : (
-                      <input
-                        type="text"
-                        placeholder="Personality tag (e.g., 'creative', 'leader', 'adventurer')"
-                        value={answer.personality_tag}
-                        onChange={(e) => handleAnswerChange(qIndex, aIndex, 'personality_tag', e.target.value)}
-                        className="personality-tag-input"
-                      />
+                      <div className="personality-weights">
+                        <label className="weights-label">Personality Points:</label>
+                        {quizData.personalities.length === 0 ? (
+                          <p className="no-personalities-message">
+                            ⚠️ Add personality outcomes above to set up scoring
+                          </p>
+                        ) : (
+                          <div className="weight-inputs">
+                            {quizData.personalities.map((personality) => (
+                              <div key={personality.id} className="weight-input-group">
+                                <span className="personality-label">
+                                  {personality.emoji} {personality.name || `Outcome ${quizData.personalities.indexOf(personality) + 1}`}:
+                                </span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="5"
+                                  value={answer.personality_weights[personality.id] || 0}
+                                  onChange={(e) => handleWeightChange(qIndex, aIndex, personality.id, e.target.value)}
+                                  className="weight-input"
+                                  placeholder="0"
+                                />
+                                <span className="weight-help">pts</span>
+                              </div>
+                            ))}
+                            <div className="weight-help-text">
+                              <small>0 = No influence, 1-5 = Points toward this personality</small>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}

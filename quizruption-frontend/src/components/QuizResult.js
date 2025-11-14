@@ -35,8 +35,45 @@ function QuizResult({ result }) {
           </div>
         ) : (
           <div className="personality-result">
-            <h2>Your Personality</h2>
-            <div className="personality-type">{result.personality}</div>
+            <div className="personality-header">
+              <h2>Your Personality Type</h2>
+              
+              {/* New personality outcome display */}
+              {result.personality_outcome ? (
+                <div className="personality-outcome">
+                  {result.personality_outcome.image_url && (
+                    <div className="personality-image-container">
+                      <img 
+                        src={result.personality_outcome.image_url.startsWith('http') 
+                          ? result.personality_outcome.image_url 
+                          : `http://localhost:8000${result.personality_outcome.image_url}`
+                        } 
+                        alt={result.personality_outcome.name}
+                        className="personality-result-image"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="personality-info">
+                    <div className="personality-title">
+                      {result.personality_outcome.emoji && (
+                        <span className="personality-emoji">{result.personality_outcome.emoji}</span>
+                      )}
+                      <h3>{result.personality_outcome.name}</h3>
+                    </div>
+                    
+                    {result.personality_outcome.description && (
+                      <div className="personality-description">
+                        <p>{result.personality_outcome.description}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                // Fallback for old personality format
+                <div className="personality-type">{result.personality}</div>
+              )}
+            </div>
             
             {result.personality_content && (
               <div className="personality-content">

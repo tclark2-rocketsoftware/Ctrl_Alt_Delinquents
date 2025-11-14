@@ -39,7 +39,10 @@ echo API Docs: http://%BACKEND_HOST%:%BACKEND_PORT%/docs
 echo ===============================================
 echo.
 
-REM Start the FastAPI server
+REM Start the FastAPI server (explicit host/port for stability)
+set "API_HOST=127.0.0.1"
+set "API_PORT=8000"
+echo Launching Uvicorn on %API_HOST%:%API_PORT% ...
 if exist "venv\Scripts\uvicorn.exe" (
     rem Start uvicorn with configurable host/port
     venv\Scripts\uvicorn.exe app.main:app --host %BACKEND_HOST% --port %BACKEND_PORT% --reload

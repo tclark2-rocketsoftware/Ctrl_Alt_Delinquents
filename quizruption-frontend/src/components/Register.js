@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { register as registerRequest } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Register({ onRegister }) {
   const [formData, setFormData] = useState({
@@ -11,6 +10,7 @@ function Register({ onRegister }) {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -44,8 +44,24 @@ function Register({ onRegister }) {
         email: formData.email,
         password: formData.password
       });
+<<<<<<< HEAD
       localStorage.setItem('authToken', data.access_token);
       onRegister(data.user);
+=======
+
+      if (response.ok) {
+        const data = await response.json();
+        // Store the access token
+        localStorage.setItem('authToken', data.access_token);
+        // Pass the user object to onRegister (which calls login)
+        onRegister(data.user);
+        // Navigate to home page to show welcome banner
+        navigate('/');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || errorData.message || 'Registration failed');
+      }
+>>>>>>> origin/jokes
     } catch (err) {
       if (err.response) {
         const errorData = err.response.data || {};
