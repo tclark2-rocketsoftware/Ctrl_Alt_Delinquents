@@ -10,7 +10,7 @@ quiz_data = [
                 "answers": [
                     {"text": "Head-on with confidence", "personality_tag": "Iron Man"},
                     {"text": "With strategy and patience", "personality_tag": "Black Panther"},
-                    {"text": "By protecting others", "personality_tag": "Captain America"},
+                    {"text": "By working with others", "personality_tag": "Captain America"},
                     {"text": "With humor and wit", "personality_tag": "Spider-Man"}
                 ]
             },
