@@ -7,7 +7,13 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- Extended profile fields (added to match ORM models)
+    display_name TEXT,
+    bio TEXT,
+    location TEXT,
+    website TEXT,
+    profile_image_url TEXT
 );
 
 -- Quizzes table
@@ -18,6 +24,8 @@ CREATE TABLE IF NOT EXISTS quizzes (
     type TEXT CHECK(type IN ('trivia', 'personality')) NOT NULL,
     created_by INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    -- JSON string storing personality definitions (nullable)
+    personalities TEXT,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
@@ -36,6 +44,8 @@ CREATE TABLE IF NOT EXISTS answers (
     text TEXT NOT NULL,
     is_correct BOOLEAN DEFAULT 0,
     personality_tag TEXT,
+    -- JSON string mapping personality ids to weight values
+    personality_weights TEXT,
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
@@ -46,6 +56,8 @@ CREATE TABLE IF NOT EXISTS results (
     user_id INTEGER,
     score INTEGER,
     personality TEXT,
+    -- JSON string containing full personality outcome data
+    personality_data TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
