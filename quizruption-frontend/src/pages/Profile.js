@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { updateUserProfile, getUserStats } from '../services/api';
+import { updateUserProfile, getUserStats, getQuizzes, deleteQuiz } from '../services/api';
 import { Link } from 'react-router-dom';
 import logger from '../utils/logger';
 
@@ -18,6 +18,9 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [userQuizzes, setUserQuizzes] = useState([]);
+  const [loadingQuizzes, setLoadingQuizzes] = useState(false);
+  const [quizError, setQuizError] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -31,6 +34,7 @@ function Profile() {
       
       // Load user stats
       loadUserStats();
+      loadUserQuizzes();
     }
   }, [user]);
 
@@ -51,6 +55,30 @@ function Profile() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUserQuizzes = async () => {
+    if (!user) return;
+    try {
+      setLoadingQuizzes(true);
+      const all = await getQuizzes();
+      setUserQuizzes(all.filter(q => q.created_by === user.id));
+      setQuizError(null);
+    } catch (err) {
+      setQuizError('Failed to load your quizzes');
+    } finally {
+      setLoadingQuizzes(false);
+    }
+  };
+
+  const handleDeleteQuiz = async (quizId, title) => {
+    if (!window.confirm(`Delete quiz "${title}"? This cannot be undone.`)) return;
+    try {
+      await deleteQuiz(quizId);
+      setUserQuizzes(prev => prev.filter(q => q.id !== quizId));
+    } catch (err) {
+      alert('Error deleting quiz: ' + (err.message || 'Unknown'));
     }
   };
 
@@ -322,11 +350,6 @@ function Profile() {
           <div className="profile-stats">
             <h2>📊 Your Quiz Journey</h2>
             <div className="stats-grid">
-              <Link to="/profile/created" className="stat-card">
-                <div className="stat-number">{stats.stats?.quizzes_created || 0}</div>
-                <div className="stat-label">Quizzes Created</div>
-                <div className="stat-link-text">View All →</div>
-              </Link>
               <Link to="/profile/taken" className="stat-card">
                 <div className="stat-number">{stats.stats?.quizzes_taken || 0}</div>
                 <div className="stat-label">Quizzes Taken</div>
@@ -351,6 +374,41 @@ function Profile() {
               <p>Build a personality or trivia quiz</p>
             </Link>
           </div>
+        </div>
+
+        {/* User's Quizzes Management */}
+        <div className="profile-quizzes-section">
+          <h2>🗂 Your Quizzes</h2>
+          {loadingQuizzes ? (
+            <div className="loading">Loading your quizzes...</div>
+          ) : quizError ? (
+            <div className="error">{quizError}</div>
+          ) : userQuizzes.length === 0 ? (
+            <div className="empty-state small">
+              <p>You have not created any quizzes yet.</p>
+              <Link to="/create" className="btn-primary">Create your first quiz</Link>
+            </div>
+          ) : (
+            <div className="user-quiz-list">
+              {userQuizzes.map(q => (
+                <div key={q.id} className="user-quiz-row">
+                  <div className="user-quiz-info">
+                    <div className="user-quiz-title-line">
+                      <strong className="user-quiz-title">{q.title}</strong>
+                      <span className={`user-quiz-type badge badge-${q.type}`}>{q.type}</span>
+                      <span className="user-quiz-date">{new Date(q.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="user-quiz-meta">Questions: {q.questions?.length || 0}</div>
+                  </div>
+                  <div className="user-quiz-actions">
+                    <Link to={`/quiz/${q.id}`} className="btn-small primary">▶ Start</Link>
+                    <Link to={`/edit/${q.id}`} className="btn-small">✏️ Edit</Link>
+                    <button onClick={() => handleDeleteQuiz(q.id, q.title)} className="btn-small danger">🗑️ Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
