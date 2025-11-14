@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
+import { login } from '../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 
 function Login({ onLogin }) {
-  // Use environment variable for API URL, fallback to localhost
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -25,33 +24,18 @@ function Login({ onLogin }) {
     setError('');
 
     try {
-  const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-  // Store the access token
-  localStorage.setItem('authToken', data.access_token);
-  // Pass the user object to onLogin (which calls login)
-  onLogin(data.user);
-  // Navigate to home page to show welcome banner
-  navigate('/');
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || errorData.message || 'Login failed');
-      }
+      const data = await login(formData);
+      // Store the access token
+      localStorage.setItem('authToken', data.access_token);
+      // Pass the user object to onLogin (which calls login)
+      onLogin(data.user);
+      // Navigate to home page to show welcome banner
+      navigate('/');
     } catch (err) {
-      // Axios error handling
       if (err.response) {
         const errorData = err.response.data || {};
         setError(errorData.detail || errorData.message || 'Login failed');
       } else if (err.request) {
-        // Likely a network / host resolution issue
         setError('Network error. Please check your connection or API URL.');
       } else {
         setError('Unexpected error. Please try again.');
