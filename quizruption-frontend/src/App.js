@@ -38,7 +38,7 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
-// Public Route component (redirects to dashboard if already logged in)
+// Public Route component (redirects to home if already logged in)
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   
@@ -46,7 +46,7 @@ function PublicRoute({ children }) {
     return <div className="loading">Loading...</div>;
   }
   
-  return !isAuthenticated ? children : <Navigate to="/dashboard" />;
+  return !isAuthenticated ? children : <Navigate to="/" />;
 }
 
 // Admin Route component (redirects to admin login if not authenticated as admin)

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -8,6 +8,7 @@ function Login({ onLogin }) {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -36,6 +37,8 @@ function Login({ onLogin }) {
         localStorage.setItem('authToken', data.access_token);
         // Pass the user object to onLogin (which calls login)
         onLogin(data.user);
+        // Navigate to home page to show welcome banner
+        navigate('/');
       } else {
         const errorData = await response.json();
         setError(errorData.detail || errorData.message || 'Login failed');

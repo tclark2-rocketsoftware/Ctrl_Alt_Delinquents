@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base
-from app.routes import quizzes, answers, results, auth, chat
+from app.routes import quizzes, answers, results, auth, chat, uploads
 from app.routes import jokes
 import logging
 from logging.handlers import RotatingFileHandler
@@ -47,6 +48,16 @@ app.include_router(answers.router, prefix="/api/answers", tags=["answers"])
 app.include_router(results.router, prefix="/api/results", tags=["results"])
 app.include_router(jokes.router, prefix="/api/jokes", tags=["jokes"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
+app.include_router(uploads.router)  # uploads router carries its own /api/upload prefix
+
+# Serve uploaded files statically
+upload_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads')
+os.makedirs(upload_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
+
+# Serve personality images statically
+personality_images_dir = os.path.join(upload_dir, 'personality_images')
+os.makedirs(personality_images_dir, exist_ok=True)
 
 # Immediate route enumeration for debugging (before startup event)
 for route in app.routes:

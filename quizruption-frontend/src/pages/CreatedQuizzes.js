@@ -51,9 +51,11 @@ function CreatedQuizzes() {
       <div className="page-header">
         <h1>📝 Your Created Content</h1>
         <p>Manage all the quizzes and trivia you've created</p>
-        <button onClick={() => navigate(-1)} className="btn-back">
-          ← Back to Profile
-        </button>
+        <div className="header-actions">
+          <Link to="/create" className="btn-primary create-new-btn">
+            ✨ Create New Quiz
+          </Link>
+        </div>
       </div>
 
       {quizzes.length === 0 ? (
@@ -103,6 +105,12 @@ function CreatedQuizzes() {
           ))}
         </div>
       )}
+      
+      <div className="page-footer">
+        <button onClick={() => navigate(-1)} className="btn-back-centered">
+          ← Back to Profile
+        </button>
+      </div>
     </div>
   );
 }

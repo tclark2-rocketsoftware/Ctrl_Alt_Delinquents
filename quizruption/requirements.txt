@@ -19,6 +19,9 @@ python-multipart==0.0.6
 PyJWT==2.8.0
 Werkzeug==2.3.7
 
+# Image processing
+Pillow>=10.0.0
+
 # CORS middleware
 python-dotenv==1.0.0
 

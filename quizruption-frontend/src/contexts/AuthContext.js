@@ -70,15 +70,23 @@ export function AuthProvider({ children }) {
 
   const updateProfile = (updates) => {
     const updatedUser = { ...state.user, ...updates };
+    console.log('Updating profile context with:', updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
     dispatch({ type: 'UPDATE_PROFILE', payload: updates });
+  };
+
+  const updateUser = (newUserData) => {
+    console.log('Replacing user data with:', newUserData);
+    localStorage.setItem('user', JSON.stringify(newUserData));
+    dispatch({ type: 'LOGIN', payload: newUserData });
   };
 
   const value = {
     ...state,
     login,
     logout,
-    updateProfile
+    updateProfile,
+    updateUser
   };
 
   return (

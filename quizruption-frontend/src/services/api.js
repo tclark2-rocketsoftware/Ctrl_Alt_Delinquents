@@ -61,11 +61,29 @@ export const getCurrentUser = async (token) => {
 
 // Profile endpoints
 export const updateUserProfile = async (profileData) => {
-  const token = localStorage.getItem('authToken');
-  const response = await api.put('/auth/profile', profileData, {
-    params: { token }
-  });
-  return response.data;
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    console.log('Updating profile with data:', profileData);
+    console.log('Using token:', token);
+    
+    const response = await api.put('/auth/profile', profileData, {
+      params: { token }
+    });
+    
+    console.log('Profile update response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Profile update error:', error);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+      console.error('Error status:', error.response.status);
+    }
+    throw error;
+  }
 };
 
 export const getUserProfile = async (userId) => {

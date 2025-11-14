@@ -1,6 +1,6 @@
 // Display all joke suggestions made by the user
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getUserStats } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -39,9 +39,11 @@ function JokeSuggestions() {
       <div className="page-header">
         <h1>😂 Your Joke Suggestions</h1>
         <p>All the jokes you've suggested for the daily joke feature</p>
-        <button onClick={() => navigate(-1)} className="btn-back">
-          ← Back to Profile
-        </button>
+        <div className="header-actions">
+          <Link to="/create" className="btn-primary create-new-btn">
+            ✨ Create New Quiz
+          </Link>
+        </div>
       </div>
 
       {suggestions.length === 0 ? (
@@ -90,6 +92,12 @@ function JokeSuggestions() {
           ))}
         </div>
       )}
+      
+      <div className="page-footer">
+        <button onClick={() => navigate(-1)} className="btn-back-centered">
+          ← Back to Profile
+        </button>
+      </div>
     </div>
   );
 }
