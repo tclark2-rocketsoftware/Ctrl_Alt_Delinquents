@@ -1,5 +1,6 @@
 // Footer component with copyright and disclaimer
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,6 +27,19 @@ function Footer() {
             <h4>Contact</h4>
             <p>Questions or feedback?</p>
             <p>Email: info@quizruption.com</p>
+            <p style={{ marginTop: '0.5rem' }}>
+              <Link 
+                to="/admin/login" 
+                style={{
+                  color: '#999',
+                  fontSize: '0.85rem',
+                  textDecoration: 'none',
+                  opacity: 0.6
+                }}
+              >
+                🔒 Admin Access
+              </Link>
+            </p>
           </div>
         </div>
         
